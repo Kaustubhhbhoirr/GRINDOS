@@ -1,0 +1,363 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DEVDSA - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "error": "#ffb4ab",
+                      "surface": "#131313",
+                      "surface-elevated": "#222222",
+                      "on-tertiary-fixed": "#00201c",
+                      "tertiary-container": "#00a494",
+                      "medium": "#f0a030",
+                      "on-primary-fixed": "#390b00",
+                      "background": "#131313",
+                      "secondary": "#c8c6c5",
+                      "on-tertiary-fixed-variant": "#005048",
+                      "on-secondary": "#313030",
+                      "on-secondary-container": "#b7b5b4",
+                      "primary-fixed-dim": "#ffb59d",
+                      "on-secondary-fixed-variant": "#474746",
+                      "border-subtle": "#2a2a2a",
+                      "error-container": "#93000a",
+                      "inverse-on-surface": "#313030",
+                      "on-secondary-fixed": "#1c1b1b",
+                      "on-error-container": "#ffdad6",
+                      "revisit": "#f0c040",
+                      "on-tertiary": "#003731",
+                      "surface-variant": "#353534",
+                      "surface-container-lowest": "#0e0e0e",
+                      "primary-container": "#da7756",
+                      "on-primary-container": "#541500",
+                      "on-tertiary-container": "#00312c",
+                      "hard": "#e05555",
+                      "surface-container-highest": "#353534",
+                      "outline-variant": "#55433d",
+                      "secondary-fixed-dim": "#c8c6c5",
+                      "surface-bright": "#3a3939",
+                      "secondary-container": "#474746",
+                      "primary-fixed": "#ffdbd0",
+                      "tertiary": "#5ddac8",
+                      "tertiary-fixed-dim": "#5ddac8",
+                      "surface-dim": "#131313",
+                      "inverse-surface": "#e5e2e1",
+                      "outline": "#a38c85",
+                      "on-surface-variant": "#dbc1b9",
+                      "on-surface": "#e5e2e1",
+                      "tertiary-fixed": "#7cf7e4",
+                      "on-background": "#e5e2e1",
+                      "on-primary-fixed-variant": "#7b2f13",
+                      "easy": "#4caf7d",
+                      "text-secondary": "#888888",
+                      "text-primary": "#f0f0f0",
+                      "text-muted": "#444444",
+                      "on-primary": "#5d1901",
+                      "secondary-fixed": "#e5e2e1",
+                      "surface-container": "#201f1f",
+                      "inverse-primary": "#994528",
+                      "surface-container-high": "#2a2a2a",
+                      "on-error": "#690005",
+                      "primary": "#ffb59d",
+                      "surface-tint": "#ffb59d",
+                      "surface-container-low": "#1c1b1b"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "xl": "32px",
+                      "sidebar-w": "56px",
+                      "lg": "24px",
+                      "xs": "4px",
+                      "base": "8px",
+                      "panel-w": "35%",
+                      "sm": "12px",
+                      "md": "16px"
+              },
+              "fontFamily": {
+                      "wordmark": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "stats-lg": [
+                              "JetBrains Mono"
+                      ],
+                      "label-caps": [
+                              "JetBrains Mono"
+                      ],
+                      "code-sm": [
+                              "JetBrains Mono"
+                      ]
+              },
+              "fontSize": {
+                      "wordmark": [
+                              "20px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "stats-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "code-sm": [
+                              "13px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: #0d0d0d;
+        }
+    </style>
+</head>
+<body class="text-on-background flex min-h-screen font-body-md text-body-md selection:bg-primary-container selection:text-white">
+<!-- SideNavBar -->
+<nav class="hidden md:flex fixed left-0 top-0 h-full flex-col items-center py-6 z-50 w-[56px] bg-[#0d0d0d] border-r border-[#2a2a2a]"><div class="mb-8 flex flex-col items-center gap-8"><span class="text-[#da7756] font-mono font-bold tracking-widest text-xs uppercase" style="writing-mode: vertical-rl; transform: rotate(180deg);">GrindOS</span></div><div class="flex flex-col gap-4 w-full items-center mt-4"><a class="relative flex items-center justify-center w-full py-3 text-[#da7756] hover:bg-[#1a1a1a] transition-colors" href="#" title="Dashboard"><div class="absolute left-0 top-0 bottom-0 w-0.5 bg-[#da7756]"></div><span class="material-symbols-outlined">grid_view</span></a><a class="flex items-center justify-center w-full py-3 text-[#888888] hover:text-white hover:bg-[#1a1a1a] transition-colors" href="#" title="Add"><span class="material-symbols-outlined">add_box</span></a><a class="flex items-center justify-center w-full py-3 text-[#888888] hover:text-white hover:bg-[#1a1a1a] transition-colors" href="#" title="Inbox"><span class="material-symbols-outlined">mail</span></a><a class="flex items-center justify-center w-full py-3 text-[#888888] hover:text-white hover:bg-[#1a1a1a] transition-colors" href="#" title="History"><span class="material-symbols-outlined">history</span></a><a class="flex items-center justify-center w-full py-3 text-[#888888] hover:text-white hover:bg-[#1a1a1a] transition-colors" href="#" title="Profile"><span class="material-symbols-outlined">person</span></a><a class="flex items-center justify-center w-full py-3 text-[#888888] hover:text-white hover:bg-[#1a1a1a] transition-colors" href="#" title="Search"><span class="material-symbols-outlined">search</span></a></div><div class="mt-auto flex flex-col items-center gap-4 pb-6 w-full"><a class="flex items-center justify-center w-full py-3 text-[#888888] hover:text-white hover:bg-[#1a1a1a] transition-colors" href="#" title="Settings"><span class="material-symbols-outlined">settings</span></a><div class="px-2"><div class="w-8 h-8 rounded-full bg-[#3b2a5c] border border-[#4a3a6c] flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"><span class="text-[10px] font-bold text-[#b7a8d9]">JD</span></div></div></div></nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 md:ml-[56px] flex flex-col min-h-screen overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-md h-14 z-40 docked bg-surface border-b border-border-subtle shrink-0">
+<div class="flex items-center gap-md w-1/3">
+<div class="md:hidden flex items-center"><span class="text-wordmark font-wordmark text-primary tracking-tight">GrindOS</span></div>
+<!-- Search -->
+<div class="hidden md:flex items-center bg-[#0d0d0d] border border-border-subtle rounded px-sm py-1 w-64 focus-within:border-primary-container transition-colors rounded-xl">
+<span class="material-symbols-outlined text-text-secondary text-sm mr-xs">search</span>
+<input class="bg-transparent border-none outline-none text-code-sm font-code-sm w-full text-text-secondary placeholder-text-muted focus:ring-0 p-0 h-6" placeholder="Search problems (Ctrl+K)" type="text">
+</div>
+</div>
+<div class="flex items-center gap-md justify-end w-1/3">
+<button class="text-text-secondary hover:text-primary transition-colors duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-text-secondary hover:text-primary transition-colors duration-200">
+<span class="material-symbols-outlined">terminal</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 p-lg max-w-[1440px] mx-auto w-full flex flex-col gap-lg">
+<!-- Page Header -->
+<div class="flex justify-between items-end mb-sm">
+<div>
+<h1 class="text-headline-lg font-headline-lg text-text-primary">Dashboard</h1>
+<p class="text-text-secondary text-code-sm font-code-sm mt-xs">GRIND_MODE // Rank: Senior</p>
+</div>
+</div>
+<!-- Stats Row -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+<!-- Stat Card 1 -->
+<div class="bg-[#1a1a1a] border border-border-subtle p-md hover:border-primary-container transition-colors group rounded-xl">
+<div class="text-text-secondary text-code-sm font-code-sm uppercase tracking-wider mb-sm">Total Solved</div>
+<div class="text-stats-lg font-stats-lg text-text-primary group-hover:text-primary-container transition-colors">128</div>
+<div class="mt-sm text-easy text-code-sm font-code-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span> +12 this week
+                    </div>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-[#1a1a1a] border border-border-subtle p-md hover:border-primary-container transition-colors group rounded-xl">
+<div class="text-text-secondary text-code-sm font-code-sm uppercase tracking-wider mb-sm">Current Streak</div>
+<div class="text-stats-lg font-stats-lg text-text-primary group-hover:text-primary-container transition-colors">14 <span class="text-headline-md font-headline-md text-text-secondary">days</span></div>
+<div class="mt-sm text-text-secondary text-code-sm font-code-sm flex items-center gap-1">
+                        Target: 30 days
+                    </div>
+</div>
+<!-- Stat Card 3 -->
+<div class="bg-[#1a1a1a] border border-border-subtle p-md hover:border-primary-container transition-colors group rounded-xl">
+<div class="text-text-secondary text-code-sm font-code-sm uppercase tracking-wider mb-sm">Longest Streak</div>
+<div class="text-stats-lg font-stats-lg text-text-primary group-hover:text-primary-container transition-colors">42 <span class="text-headline-md font-headline-md text-text-secondary">days</span></div>
+<div class="mt-sm text-text-muted text-code-sm font-code-sm flex items-center gap-1">
+                        All-time best
+                    </div>
+</div>
+</section>
+<!-- Activity Heatmap & Calendar -->
+<section class="bg-[#1a1a1a] border border-border-subtle p-lg hover:border-primary-container transition-colors w-full rounded-xl"><div class="flex justify-between items-center mb-md"><h2 class="text-headline-md font-headline-md text-text-primary">Activity</h2><span class="text-text-secondary text-code-sm font-code-sm">Current Month</span></div><div class="overflow-x-auto pb-sm"><div class="grid grid-cols-7 gap-md min-w-max justify-items-center mb-md text-text-secondary text-code-sm font-code-sm uppercase tracking-widest"><div class="">Sun</div><div class="">Mon</div><div class="">Tue</div><div class="">Wed</div><div class="">Thu</div><div class="">Fri</div><div class="">Sat</div></div><div class="grid grid-cols-7 gap-md min-w-max"> <!-- Empty cells for start of month alignment --> <div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl"></div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl"></div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">1</div><div class="w-[60px] h-[60px] bg-primary-container rounded-xl flex items-center justify-center text-white">2</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">3</div><div class="w-[60px] h-[60px] bg-revisit rounded-xl flex items-center justify-center text-white">4</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">5</div><div class="w-[60px] h-[60px] bg-primary-container rounded-xl flex items-center justify-center text-white">6</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">7</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">8</div><div class="w-[60px] h-[60px] bg-primary-container rounded-xl flex items-center justify-center text-white">9</div><div class="w-[60px] h-[60px] bg-primary-container rounded-xl flex items-center justify-center text-white">10</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">11</div><div class="w-[60px] h-[60px] bg-revisit rounded-xl flex items-center justify-center text-white">12</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">13</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">14</div><div class="w-[60px] h-[60px] bg-primary-container rounded-xl flex items-center justify-center text-white">15</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">16</div><div class="w-[60px] h-[60px] bg-primary-container border-2 border-white rounded-xl flex items-center justify-center text-white shadow-[0_0_12px_rgba(255,255,255,0.3)]">17</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">18</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">19</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">20</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">21</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">22</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">23</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">24</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">25</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">26</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">27</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">28</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">29</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">30</div><div class="w-[60px] h-[60px] bg-surface-container-lowest rounded-xl flex items-center justify-center text-text-secondary">31</div></div></div></section>
+<!-- Bottom Row: Recent & Breakdown -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<!-- Recent Problems (Takes up 2 cols on wide screens) -->
+<section class="lg:col-span-2 bg-[#1a1a1a] border border-border-subtle flex flex-col hover:border-primary-container transition-colors overflow-hidden rounded-xl">
+<div class="p-md border-b border-border-subtle flex justify-between items-center bg-[#1a1a1a]">
+<h2 class="text-headline-md font-headline-md text-text-primary">Recent Problems</h2>
+<a class="text-text-secondary text-code-sm font-code-sm hover:text-primary-container transition-colors" href="#">View All</a>
+</div>
+<div class="flex flex-col">
+<!-- Table Header -->
+<div class="flex px-md py-sm border-b border-border-subtle text-code-sm font-code-sm text-text-muted uppercase tracking-wider bg-[#0d0d0d]">
+<div class="w-16">ID</div>
+<div class="flex-1">Title</div>
+<div class="w-24 text-center">Difficulty</div>
+<div class="w-24 text-right">Status</div>
+</div>
+<!-- Problem Item 1 -->
+<div class="flex px-md py-sm border-b border-border-subtle items-center hover:bg-surface-variant transition-colors group cursor-pointer">
+<div class="w-16 text-code-sm font-code-sm text-text-secondary">#001</div>
+<div class="flex-1 text-text-primary font-medium group-hover:text-primary-container transition-colors truncate pr-sm">Two Sum</div>
+<div class="w-24 flex justify-center">
+<span class="bg-[#1a3a2a] text-[#4caf7d] border border-[#4caf7d] text-label-caps font-label-caps px-2 py-0.5 uppercase rounded-lg">Easy</span>
+</div>
+<div class="w-24 flex justify-end">
+<span class="material-symbols-outlined text-easy text-sm">check_circle</span>
+</div>
+</div>
+<!-- Problem Item 2 -->
+<div class="flex px-md py-sm border-b border-border-subtle items-center hover:bg-surface-variant transition-colors group cursor-pointer">
+<div class="w-16 text-code-sm font-code-sm text-text-secondary">#015</div>
+<div class="flex-1 text-text-primary font-medium group-hover:text-primary-container transition-colors truncate pr-sm">3Sum</div>
+<div class="w-24 flex justify-center">
+<span class="bg-[#3a2a0a] text-[#f0a030] border border-[#f0a030] text-label-caps font-label-caps px-2 py-0.5 uppercase rounded-lg">Medium</span>
+</div>
+<div class="w-24 flex justify-end">
+<span class="material-symbols-outlined text-revisit text-sm" title="Marked for Revisit">bookmark</span>
+</div>
+</div>
+<!-- Problem Item 3 -->
+<div class="flex px-md py-sm border-b border-border-subtle items-center hover:bg-surface-variant transition-colors group cursor-pointer">
+<div class="w-16 text-code-sm font-code-sm text-text-secondary">#042</div>
+<div class="flex-1 text-text-primary font-medium group-hover:text-primary-container transition-colors truncate pr-sm">Trapping Rain Water</div>
+<div class="w-24 flex justify-center">
+<span class="bg-[#3a1a1a] text-[#e05555] border border-[#e05555] text-label-caps font-label-caps px-2 py-0.5 uppercase rounded-lg">Hard</span>
+</div>
+<div class="w-24 flex justify-end">
+<span class="material-symbols-outlined text-easy text-sm">check_circle</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Difficulty Breakdown -->
+<section class="bg-[#1a1a1a] border border-border-subtle p-md flex flex-col hover:border-primary-container transition-colors rounded-xl">
+<h2 class="text-headline-md font-headline-md text-text-primary mb-lg">Difficulty Breakdown</h2>
+<div class="flex flex-col md:flex-row items-center justify-center gap-lg mt-auto mb-auto">
+<!-- SVG Donut Chart -->
+<div class="relative w-32 h-32">
+<svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+<!-- Hard Segment -->
+<path class="text-[#e05555]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="17.18 100" stroke-dashoffset="-77.82" stroke-width="4"></path>
+<!-- Medium Segment -->
+<path class="text-[#f0a030]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="32.81 100" stroke-dashoffset="-45.01" stroke-width="4"></path>
+<!-- Easy Segment -->
+<path class="text-[#4caf7d]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="50 100" stroke-dashoffset="5" stroke-width="4"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center flex-col">
+<span class="text-stats-lg font-stats-lg text-text-primary text-xl">128</span>
+<span class="text-code-sm font-code-sm text-text-secondary text-[10px]">Total</span>
+</div>
+</div>
+<!-- Legend -->
+<div class="flex flex-col gap-sm w-full">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-xs">
+<div class="w-3 h-3 rounded-full bg-easy"></div>
+<span class="text-text-primary font-medium text-sm">Easy</span>
+</div>
+<span class="text-code-sm font-code-sm text-text-secondary">64</span>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-xs">
+<div class="w-3 h-3 rounded-full bg-medium"></div>
+<span class="text-text-primary font-medium text-sm">Medium</span>
+</div>
+<span class="text-code-sm font-code-sm text-text-secondary">42</span>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-xs">
+<div class="w-3 h-3 rounded-full bg-hard"></div>
+<span class="text-text-primary font-medium text-sm">Hard</span>
+</div>
+<span class="text-code-sm font-code-sm text-text-secondary">22</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+<!-- BottomNavBar (Mobile) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center py-xs bg-surface-container md:hidden border-t border-border-subtle rounded-t-lg">
+<!-- Dashboard (Active) -->
+<a class="flex flex-col items-center justify-center text-primary bg-primary-container/10 rounded-xl px-4 py-1 scale-95 transition-transform" href="#" title="Dashboard">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-label-caps-mobile font-label-caps mt-xs text-[10px]">Dashboard</span>
+</a>
+<!-- Problems -->
+<a class="flex flex-col items-center justify-center text-text-muted px-4 py-1 active:bg-surface-variant rounded-xl" href="#" title="Problems">
+<span class="material-symbols-outlined">code</span>
+<span class="text-label-caps-mobile font-label-caps mt-xs text-[10px]">Problems</span>
+</a>
+<!-- History -->
+<a class="flex flex-col items-center justify-center text-text-muted px-4 py-1 active:bg-surface-variant rounded-xl" href="#" title="History">
+<span class="material-symbols-outlined">history</span>
+<span class="text-label-caps-mobile font-label-caps mt-xs text-[10px]">History</span>
+</a>
+<!-- Settings -->
+<a class="flex flex-col items-center justify-center text-text-muted px-4 py-1 active:bg-surface-variant rounded-xl" href="#" title="Settings">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-label-caps-mobile font-label-caps mt-xs text-[10px]">Settings</span>
+</a>
+</nav>
+<button class="fixed bottom-xl right-xl w-14 h-14 bg-primary-container text-white rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(218,119,86,0.4)] hover:scale-110 active:scale-95 transition-all z-[60]"><span class="material-symbols-outlined">add</span></button>
+
+
+</body></html>

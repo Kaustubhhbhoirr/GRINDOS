@@ -1,0 +1,346 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>GrindOS - Revisit Queue</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#1c1b1b",
+                        "revisit": "#f0c040",
+                        "on-surface-variant": "#dbc1b9",
+                        "inverse-primary": "#994528",
+                        "surface-dim": "#131313",
+                        "secondary-fixed": "#e5e2e1",
+                        "on-tertiary-fixed": "#00201c",
+                        "tertiary-container": "#00a494",
+                        "surface-tint": "#ffb59d",
+                        "text-primary": "#f0f0f0",
+                        "surface-container": "#201f1f",
+                        "on-error": "#690005",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-tertiary-container": "#00312c",
+                        "border-subtle": "#2a2a2a",
+                        "surface": "#131313",
+                        "secondary-container": "#474746",
+                        "background": "#131313",
+                        "surface-elevated": "#222222",
+                        "outline": "#a38c85",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "tertiary-fixed": "#7cf7e4",
+                        "primary-fixed-dim": "#ffb59d",
+                        "on-tertiary": "#003731",
+                        "tertiary": "#5ddac8",
+                        "outline-variant": "#55433d",
+                        "surface-container-highest": "#353534",
+                        "text-secondary": "#888888",
+                        "inverse-surface": "#e5e2e1",
+                        "on-background": "#e5e2e1",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "on-secondary-fixed-variant": "#474746",
+                        "error": "#ffb4ab",
+                        "inverse-on-surface": "#313030",
+                        "hard": "#e05555",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-high": "#2a2a2a",
+                        "tertiary-fixed-dim": "#5ddac8",
+                        "on-tertiary-fixed-variant": "#005048",
+                        "primary-container": "#da7756",
+                        "easy": "#4caf7d",
+                        "on-secondary": "#313030",
+                        "on-primary": "#5d1901",
+                        "primary": "#ffb59d",
+                        "surface-bright": "#3a3939",
+                        "on-primary-fixed": "#390b00",
+                        "on-primary-container": "#541500",
+                        "surface-variant": "#353534",
+                        "on-surface": "#e5e2e1",
+                        "text-muted": "#444444",
+                        "on-secondary-container": "#b7b5b4",
+                        "on-primary-fixed-variant": "#7b2f13",
+                        "error-container": "#93000a",
+                        "secondary": "#c8c6c5",
+                        "medium": "#f0a030",
+                        "primary-fixed": "#ffdbd0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sm": "12px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "base": "8px",
+                        "sidebar-w": "56px",
+                        "xs": "4px",
+                        "xl": "32px",
+                        "panel-w": "35%"
+                    },
+                    "fontFamily": {
+                        "code-sm": ["JetBrains Mono"],
+                        "wordmark": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "stats-lg": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "code-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "wordmark": ["20px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "500"}],
+                        "stats-lg": ["32px", {"lineHeight": "1", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #0d0d0d; color: #f0f0f0; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glow-primary:hover { box-shadow: 0px 0px 8px #da7756; }
+    </style>
+</head>
+<body class="font-body-md text-body-md overflow-x-hidden">
+<!-- Sidebar Navigation (Desktop) -->
+<nav class="hidden md:flex fixed left-0 top-0 h-full w-sidebar-w flex-col items-center py-md z-50 bg-surface-container border-r border-border-subtle" data-component="SideNavBar" style="background-color: rgb(13, 13, 13);">
+<div class="mb-xl"><span class="text-primary font-wordmark text-wordmark rotate-180" style="writing-mode: vertical-rl; color: rgb(218, 119, 86);">GrindOS</span></div>
+<div class="flex flex-col gap-lg items-center flex-1"><button class="p-base text-primary transition-all">
+    <span class="material-symbols-outlined" data-icon="grid_view" style="font-variation-settings: 'FILL' 1; color: #da7756;">grid_view</span>
+</button>
+<button class="p-base text-text-muted hover:text-on-surface transition-all">
+    <span class="material-symbols-outlined" data-icon="add_box">add_box</span>
+</button>
+<button class="p-base text-text-muted hover:text-on-surface transition-all">
+    <span class="material-symbols-outlined" data-icon="mail">mail</span>
+</button>
+<button class="p-base text-text-muted hover:text-on-surface transition-all">
+    <span class="material-symbols-outlined" data-icon="history">history</span>
+</button>
+<button class="p-base text-text-muted hover:text-on-surface transition-all">
+    <span class="material-symbols-outlined" data-icon="person">person</span>
+</button>
+<button class="p-base text-text-muted hover:text-on-surface transition-all">
+    <span class="material-symbols-outlined" data-icon="search">search</span>
+</button></div>
+<div class="mt-auto"><div class="flex flex-col gap-lg items-center">
+    <button class="p-base text-text-muted hover:text-on-surface transition-all mb-4">
+        <span class="material-symbols-outlined" data-icon="settings">settings</span>
+    </button>
+    <div class="w-8 h-8 rounded-full bg-[#6b21a8] border border-border-subtle flex items-center justify-center overflow-hidden mb-md">
+        <span class="material-symbols-outlined text-white text-xs">person</span>
+    </div>
+</div></div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="md:ml-[56px] min-h-screen px-lg py-xl max-w-[1440px] mx-auto">
+<!-- Header Section -->
+<header class="flex items-center justify-between mb-lg">
+<div class="flex items-center gap-sm">
+<h1 class="font-wordmark text-headline-lg tracking-tight">REVISIT_QUEUE</h1>
+<span class="bg-revisit text-surface px-2 py-0.5 rounded-full font-code-sm text-code-sm font-bold flex items-center justify-center min-w-[24px]">3</span>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative">
+<span class="material-symbols-outlined text-text-secondary" data-icon="terminal">terminal</span>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined text-text-secondary" data-icon="notifications">notifications</span>
+</div>
+</div>
+</header>
+<!-- CTA Banner -->
+<section class="mb-xl">
+<div class="bg-revisit flex items-center justify-between px-md py-sm rounded-xl border border-surface-container-highest">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-surface" data-icon="priority_high">priority_high</span>
+<p class="text-surface font-headline-md font-bold">You flagged 3 problems as tough — ready to revisit?</p>
+</div>
+<div class="flex items-center gap-md">
+<button class="bg-surface text-revisit px-lg py-xs rounded-lg font-bold hover:opacity-90 transition-opacity flex items-center gap-xs">
+                        Let's go <span class="text-lg">💪</span>
+</button>
+<button class="text-surface hover:opacity-60">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Problem Cards List -->
+<div class="flex flex-col gap-lg">
+<!-- Card 1: Trapping Rain Water -->
+<article class="bg-surface-container-low border border-border-subtle rounded-xl p-md hover:border-primary-container transition-colors group">
+<div class="flex flex-col md:flex-row md:items-start gap-md">
+<div class="flex-1">
+<div class="flex items-center gap-sm mb-xs">
+<span class="font-code-sm text-text-muted">#042</span>
+<h3 class="font-headline-md text-text-primary group-hover:text-primary transition-colors">Trapping Rain Water</h3>
+<div class="bg-[#3a1a1a] border border-hard text-hard px-2 py-0.5 rounded font-label-caps text-label-caps uppercase">Hard</div>
+<span class="material-symbols-outlined text-revisit" data-icon="bookmark" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+</div>
+<div class="flex flex-wrap gap-xs mb-sm">
+<span class="bg-surface-container-high text-text-secondary px-2 py-0.5 rounded-sm text-code-sm font-code-sm">Two Pointers</span>
+<span class="bg-surface-container-high text-text-secondary px-2 py-0.5 rounded-sm text-code-sm font-code-sm">Stack</span>
+</div>
+<div class="flex items-center gap-xl text-code-sm text-text-secondary mb-md">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-xs" data-icon="calendar_today">calendar_today</span>
+<span class="">Solved: May 17, 2026</span>
+</div>
+<div class="flex items-center gap-0.5">
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-text-muted text-sm" data-icon="star">star</span>
+</div>
+</div>
+<div class="bg-surface border-l-2 border-primary-container p-sm mb-sm">
+<p class="text-text-secondary font-code-sm leading-relaxed">
+<span class="text-primary-container opacity-50 font-bold">NOTE:</span> "Need to optimize the stack approach."
+                            </p>
+</div>
+</div>
+<div class="flex flex-row md:flex-col gap-sm md:items-end justify-between md:justify-start">
+<button class="bg-primary-container text-on-primary-container font-bold px-lg py-sm rounded-lg glow-primary transition-all active:scale-95 whitespace-nowrap">
+                            Re-solved ✓
+                        </button>
+<button class="border border-border-subtle text-text-secondary px-lg py-sm rounded-lg hover:border-primary transition-all text-label-caps font-label-caps uppercase">
+                            View Source
+                        </button>
+</div>
+</div>
+</article>
+<!-- Card 2: 3Sum -->
+<article class="bg-surface-container-low border border-border-subtle rounded-xl p-md hover:border-primary-container transition-colors group">
+<div class="flex flex-col md:flex-row md:items-start gap-md">
+<div class="flex-1">
+<div class="flex items-center gap-sm mb-xs">
+<span class="font-code-sm text-text-muted">#015</span>
+<h3 class="font-headline-md text-text-primary group-hover:text-primary transition-colors">3Sum</h3>
+<div class="bg-[#3a2a0a] border border-medium text-medium px-2 py-0.5 rounded font-label-caps text-label-caps uppercase">Medium</div>
+<span class="material-symbols-outlined text-revisit" data-icon="bookmark" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+</div>
+<div class="flex flex-wrap gap-xs mb-sm">
+<span class="bg-surface-container-high text-text-secondary px-2 py-0.5 rounded-sm text-code-sm font-code-sm">Two Pointers</span>
+<span class="bg-surface-container-high text-text-secondary px-2 py-0.5 rounded-sm text-code-sm font-code-sm">Array</span>
+</div>
+<div class="flex items-center gap-xl text-code-sm text-text-secondary mb-md">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-xs" data-icon="calendar_today">calendar_today</span>
+<span class="">Solved: May 15, 2026</span>
+</div>
+<div class="flex items-center gap-0.5">
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-text-muted text-sm" data-icon="star">star</span>
+<span class="material-symbols-outlined text-text-muted text-sm" data-icon="star">star</span>
+</div>
+</div>
+<div class="bg-surface border-l-2 border-primary-container p-sm mb-sm">
+<p class="text-text-secondary font-code-sm leading-relaxed">
+<span class="text-primary-container opacity-50 font-bold">NOTE:</span> "Watch out for duplicate triplets."
+                            </p>
+</div>
+</div>
+<div class="flex flex-row md:flex-col gap-sm md:items-end justify-between md:justify-start">
+<button class="bg-primary-container text-on-primary-container font-bold px-lg py-sm rounded-lg glow-primary transition-all active:scale-95 whitespace-nowrap">
+                            Re-solved ✓
+                        </button>
+<button class="border border-border-subtle text-text-secondary px-lg py-sm rounded-lg hover:border-primary transition-all text-label-caps font-label-caps uppercase">
+                            View Source
+                        </button>
+</div>
+</div>
+</article>
+<!-- Card 3: Two Sum -->
+<article class="bg-surface-container-low border border-border-subtle rounded-xl p-md hover:border-primary-container transition-colors group">
+<div class="flex flex-col md:flex-row md:items-start gap-md">
+<div class="flex-1">
+<div class="flex items-center gap-sm mb-xs">
+<span class="font-code-sm text-text-muted">#001</span>
+<h3 class="font-headline-md text-text-primary group-hover:text-primary transition-colors">Two Sum</h3>
+<div class="bg-[#1a3a2a] border border-easy text-easy px-2 py-0.5 rounded font-label-caps text-label-caps uppercase">Easy</div>
+<span class="material-symbols-outlined text-revisit" data-icon="bookmark" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+</div>
+<div class="flex flex-wrap gap-xs mb-sm">
+<span class="bg-surface-container-high text-text-secondary px-2 py-0.5 rounded-sm text-code-sm font-code-sm">Hash Map</span>
+<span class="bg-surface-container-high text-text-secondary px-2 py-0.5 rounded-sm text-code-sm font-code-sm">Array</span>
+</div>
+<div class="flex items-center gap-xl text-code-sm text-text-secondary mb-md">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-xs" data-icon="calendar_today">calendar_today</span>
+<span class="">Solved: May 10, 2026</span>
+</div>
+<div class="flex items-center gap-0.5">
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<div class="bg-surface border-l-2 border-primary-container p-sm mb-sm">
+<p class="text-text-secondary font-code-sm leading-relaxed">
+<span class="text-primary-container opacity-50 font-bold">NOTE:</span> "Classic one-pass hash map."
+                            </p>
+</div>
+</div>
+<div class="flex flex-row md:flex-col gap-sm md:items-end justify-between md:justify-start">
+<button class="bg-primary-container text-on-primary-container font-bold px-lg py-sm rounded-lg glow-primary transition-all active:scale-95 whitespace-nowrap">
+                            Re-solved ✓
+                        </button>
+<button class="border border-border-subtle text-text-secondary px-lg py-sm rounded-lg hover:border-primary transition-all text-label-caps font-label-caps uppercase">
+                            View Source
+                        </button>
+</div>
+</div>
+</article>
+</div>
+<!-- Footer / Progress Meta -->
+<footer class="mt-xl pt-lg border-t border-border-subtle flex justify-between items-center text-code-sm text-text-muted">
+<div class="flex items-center gap-md">
+<span class="">REVISIT_SUCCESS_RATE: 87%</span>
+<span class="w-1.5 h-1.5 rounded-full bg-easy"></span>
+<span class="">SYSTEM_UPTIME: 99.9%</span>
+</div>
+<div class="font-code-sm uppercase tracking-widest">
+                Term_Build_v2.0.4
+            </div>
+</footer>
+</main>
+<!-- Bottom Nav (Mobile) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center py-xs bg-surface-container border-t border-border-subtle" data-component="BottomNavBar">
+<div class="flex flex-col items-center justify-center text-text-muted px-4 py-1">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-caps text-[10px]">DASHBOARD</span>
+</div>
+<div class="flex flex-col items-center justify-center text-text-muted px-4 py-1">
+<span class="material-symbols-outlined" data-icon="code">code</span>
+<span class="font-label-caps text-[10px]">PROBLEMS</span>
+</div>
+<div class="flex flex-col items-center justify-center text-primary bg-primary-container/10 rounded-xl px-4 py-1">
+<span class="material-symbols-outlined" data-icon="history" style="font-variation-settings: 'FILL' 1;">history</span>
+<span class="font-label-caps text-[10px]">HISTORY</span>
+</div>
+<div class="flex flex-col items-center justify-center text-text-muted px-4 py-1">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-caps text-[10px]">SETTINGS</span>
+</div>
+</nav>
+
+
+</body></html>
