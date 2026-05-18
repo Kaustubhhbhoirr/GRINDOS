@@ -17,7 +17,6 @@ import {
   Zap,
   Activity
 } from 'lucide-react';
-import { seedProblems } from '../utils/seeder';
 
 export default function Profile() {
   const [problems, setProblems] = useState([]);
@@ -33,6 +32,7 @@ export default function Profile() {
   const [toast, setToast] = useState({ message: '', type: '' });
 
   useEffect(() => {
+    document.title = "GrindOS - Profile & Settings";
     loadProblems();
     
     const loadProfile = () => {
@@ -268,22 +268,6 @@ export default function Profile() {
     return acc;
   }, {});
   const sortedCategories = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]);
-
-  // Seeding
-  const handleSeedData = async () => {
-    if (!window.api) return;
-    try {
-      const response = await window.api.saveProblems(seedProblems);
-      if (response.success) {
-        showToast('Successfully seeded 10 LeetCode problems!', 'success');
-        loadProblems();
-      } else {
-        showToast('Failed to seed: ' + response.error, 'error');
-      }
-    } catch (err) {
-      showToast('Error seeding: ' + err.message, 'error');
-    }
-  };
 
   // Reset
   const handleResetData = async () => {
@@ -728,15 +712,6 @@ export default function Profile() {
               </div>
 
               <div className="flex flex-col gap-3">
-                {/* Seed Button */}
-                <button
-                  type="button"
-                  onClick={handleSeedData}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#da7756]/10 hover:bg-[#da7756]/20 text-[#da7756] border border-[#da7756]/30 rounded-xl text-[12px] font-mono font-bold transition-all cursor-pointer whitespace-nowrap"
-                >
-                  <Sparkles size={14} /> Seed Demo Database
-                </button>
-
                 {/* Export Backup */}
                 <button
                   type="button"

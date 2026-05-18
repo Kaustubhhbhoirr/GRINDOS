@@ -62,6 +62,7 @@ export default function AddProblem() {
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
+    document.title = editingProblem ? "GrindOS - Edit Problem" : "GrindOS - Add Problem";
     // Generate an incremental problem ID if we have problems, otherwise default to "1"
     if (window.api && !editingProblem) {
       window.api.getProblems().then(data => {

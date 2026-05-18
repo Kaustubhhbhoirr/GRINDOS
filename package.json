@@ -6,9 +6,39 @@
   "main": "electron/main.js",
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on tcp:5173 && electron .\"",
-    "build": "vite build && electron-builder",
+    "build": "vite build",
+    "dist": "vite build && electron-builder",
     "lint": "eslint .",
     "preview": "vite preview"
+  },
+  "author": "GrindOS Team",
+  "description": "GrindOS Competitive Programming Tracker",
+  "build": {
+    "appId": "com.grindos.app",
+    "productName": "GrindOS",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "public/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "public/icon.png",
+      "uninstallerIcon": "public/icon.png",
+      "installerHeaderIcon": "public/icon.png",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "GrindOS"
+    }
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

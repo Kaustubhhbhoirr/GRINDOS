@@ -59,6 +59,7 @@ export default function Search() {
   const [toast, setToast] = useState({ message: '', type: '' });
 
   useEffect(() => {
+    document.title = "GrindOS - Search Problems";
     loadProblems();
   }, []);
 
@@ -276,7 +277,7 @@ export default function Search() {
               <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-12 text-center flex flex-col items-center justify-center select-none">
                 <AlertTriangle size={36} className="text-[#888888] mb-3 animate-pulse" />
                 <span className="text-[13px] font-mono text-[#888888] mb-1">No solved problems match current query.</span>
-                <span className="text-[11px] text-[#444444]">Modify filter variables or seed datasets.</span>
+                <span className="text-[11px] text-[#444444]">Modify filter variables to find your problems.</span>
               </div>
             ) : (
               filteredProblems.map((prob, idx) => (

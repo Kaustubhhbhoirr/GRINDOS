@@ -26,6 +26,7 @@ export default function Dashboard() {
   const [dailyVolume, setDailyVolume] = useState(3);
 
   useEffect(() => {
+    document.title = "GrindOS - Dashboard";
     if (window.api) {
       window.api.getProblems().then(data => {
         setProblems(data || []);

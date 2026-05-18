@@ -25,6 +25,7 @@ export default function RevisitQueue() {
   const listRef = useRef(null);
 
   useEffect(() => {
+    document.title = "GrindOS - Revisit Queue";
     loadProblems();
   }, []);
 
