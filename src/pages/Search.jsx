@@ -121,6 +121,7 @@ export default function Search() {
     const query = searchQuery.toLowerCase();
     const matchesSearch = 
       problem.title.toLowerCase().includes(query) ||
+      (problem.problemId && problem.problemId.toLowerCase().includes(query)) ||
       (problem.intuition && problem.intuition.toLowerCase().includes(query)) ||
       (problem.notes && problem.notes.toLowerCase().includes(query)) ||
       (problem.code && problem.code.toLowerCase().includes(query)) ||
@@ -289,7 +290,7 @@ export default function Search() {
                   <div className="flex flex-col gap-1.5 min-w-0 pr-4">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <span className="font-mono text-[12px] text-[#888888]">
-                        #{String(idx + 1).padStart(3, '0')}
+                        #{prob.problemId || String(idx + 1).padStart(3, '0')}
                       </span>
                       <h3 className="font-sans font-bold text-[16px] text-[#f0f0f0] group-hover:text-[#da7756] transition-colors truncate">
                         {prob.title}

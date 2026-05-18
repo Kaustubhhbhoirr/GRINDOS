@@ -11,7 +11,11 @@ import {
   TrendingUp, 
   Award as AwardIcon,
   ArrowRight,
-  Save
+  Save,
+  Flame,
+  Clock,
+  Zap,
+  Activity
 } from 'lucide-react';
 import { seedProblems } from '../utils/seeder';
 
@@ -31,19 +35,25 @@ export default function Profile() {
   useEffect(() => {
     loadProblems();
     
-    // Load profile configurations
-    const stored = localStorage.getItem('grindos_profile_info');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed.name) setProfileName(parsed.name);
-        if (parsed.goal) setProfileGoal(parsed.goal);
-        if (parsed.language) setWeapon(parsed.language);
-        if (parsed.dailyVolume) setDailyVolume(String(parsed.dailyVolume));
-      } catch (e) {
-        console.error(e);
+    const loadProfile = () => {
+      const stored = localStorage.getItem('grindos_profile_info');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.name) setProfileName(parsed.name);
+          if (parsed.goal) setProfileGoal(parsed.goal);
+          if (parsed.language) setWeapon(parsed.language);
+          if (parsed.dailyVolume) setDailyVolume(String(parsed.dailyVolume));
+        } catch (e) {
+          console.error(e);
+        }
       }
-    }
+    };
+
+    loadProfile();
+
+    window.addEventListener('storage', loadProfile);
+    return () => window.removeEventListener('storage', loadProfile);
   }, []);
 
   const loadProblems = () => {
@@ -68,6 +78,7 @@ export default function Profile() {
     };
     localStorage.setItem('grindos_profile_info', JSON.stringify(config));
     showToast('Profile credentials saved successfully!', 'success');
+    window.dispatchEvent(new Event('storage'));
   };
 
   // Gamification stats
@@ -99,6 +110,157 @@ export default function Profile() {
     if (lvl === 9) return 'DP Disciple';
     return 'Algorithmic Grandmaster';
   };
+
+  const getLocalDateString = (date = new Date()) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+
+  // Streaks
+  const calculateStreak = (allProblems) => {
+    if (allProblems.length === 0) return 0;
+    const solvedDates = [...new Set(allProblems.map(p => p.solvedDate))].sort((a, b) => b.localeCompare(a));
+    const todayStr = getLocalDateString();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = getLocalDateString(yesterday);
+
+    if (solvedDates[0] !== todayStr && solvedDates[0] !== yesterdayStr) {
+      return 0;
+    }
+
+    let currentStreak = 0;
+    let checkDate = new Date();
+    if (solvedDates[0] === yesterdayStr) {
+      checkDate.setDate(checkDate.getDate() - 1);
+    }
+
+    while (true) {
+      const checkStr = getLocalDateString(checkDate);
+      if (solvedDates.includes(checkStr)) {
+        currentStreak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    return currentStreak;
+  };
+
+  const calculateLongestStreak = (allProblems) => {
+    if (allProblems.length === 0) return 0;
+    const sortedDates = [...new Set(allProblems.map(p => p.solvedDate))].sort((a, b) => a.localeCompare(b));
+    
+    let maxStreak = 0;
+    let currentStreak = 0;
+    let prevDate = null;
+    
+    for (let i = 0; i < sortedDates.length; i++) {
+      const currentDate = new Date(sortedDates[i]);
+      if (prevDate === null) {
+        currentStreak = 1;
+      } else {
+        const diffTime = Math.abs(currentDate - prevDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays === 1) {
+          currentStreak++;
+        } else if (diffDays > 1) {
+          maxStreak = Math.max(maxStreak, currentStreak);
+          currentStreak = 1;
+        }
+      }
+      prevDate = currentDate;
+    }
+    return Math.max(maxStreak, currentStreak);
+  };
+
+  const currentStreak = calculateStreak(problems);
+  const longestStreak = calculateLongestStreak(problems);
+
+  // Average Time Spent
+  const averageTime = problems.length > 0 
+    ? Math.round(problems.reduce((sum, p) => sum + (Number(p.timeSpent) || 0), 0) / problems.length)
+    : 0;
+
+  // Topic Analytics
+  const categoryStats = problems.reduce((acc, p) => {
+    if (!acc[p.category]) {
+      acc[p.category] = { count: 0, totalConfidence: 0 };
+    }
+    acc[p.category].count += 1;
+    acc[p.category].totalConfidence += (p.confidence || 3);
+    return acc;
+  }, {});
+
+  let strongestTopic = 'None';
+  let strongestCount = 0;
+  let strongestConfidenceAvg = 0;
+
+  let weakestTopic = 'None';
+  let weakestConfidenceAvg = 6;
+  let weakestCount = 0;
+
+  Object.entries(categoryStats).forEach(([category, stats]) => {
+    const avgConf = stats.totalConfidence / stats.count;
+    if (stats.count > strongestCount || (stats.count === strongestCount && avgConf > strongestConfidenceAvg)) {
+      strongestTopic = category;
+      strongestCount = stats.count;
+      strongestConfidenceAvg = avgConf;
+    }
+    if (avgConf < weakestConfidenceAvg || (avgConf === weakestConfidenceAvg && stats.count < weakestCount)) {
+      weakestTopic = category;
+      weakestConfidenceAvg = avgConf;
+      weakestCount = stats.count;
+    }
+  });
+
+  // Badges list
+  const badgesList = [
+    {
+      id: 'first_blood',
+      title: 'First Blood',
+      desc: 'Logged your first solved coding problem.',
+      unlocked: problems.length >= 1,
+      icon: '🎯'
+    },
+    {
+      id: 'consistency_3',
+      title: 'Consistency King',
+      desc: 'Achieved a solve streak of 3+ consecutive days.',
+      unlocked: longestStreak >= 3,
+      icon: '🔥'
+    },
+    {
+      id: 'consistency_7',
+      title: 'Grind Master',
+      desc: 'Achieved a solve streak of 7+ consecutive days.',
+      unlocked: longestStreak >= 7,
+      icon: '👑'
+    },
+    {
+      id: 'faang_slayer',
+      title: 'FAANG Slayer',
+      desc: 'Solved 5+ Medium/Hard tier problems.',
+      unlocked: problems.filter(p => (p.difficulty === 'medium' || p.difficulty === 'hard') && !p.partial).length >= 5,
+      icon: '⚔️'
+    },
+    {
+      id: 'bug_squasher',
+      title: 'Bug Squasher',
+      desc: 'Successfully finished logging a partial problem.',
+      unlocked: problems.some(p => !p.partial && p.timeSpent > 0),
+      icon: '🛠️'
+    },
+    {
+      id: 'perfect_score',
+      title: 'Perfect 5-Star',
+      desc: 'Logged at least one 5-star confidence solve.',
+      unlocked: problems.some(p => p.confidence === 5),
+      icon: '💎'
+    }
+  ];
 
   // Categories count
   const categoryCounts = problems.reduce((acc, p) => {
@@ -245,6 +407,189 @@ export default function Profile() {
           </div>
         </section>
 
+        {/* Premium Performance & Consistency Stats */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 select-none">
+          {/* Card 1: Total Solved */}
+          <div className="bg-[#1a1a1a] border border-[#2a2a2a] p-4 hover:border-[#da7756]/30 transition-colors rounded-xl flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-[#da7756]/10 flex items-center justify-center text-[#da7756] shrink-0">
+              <CheckCircle2 size={20} />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[#888888] text-[11px] font-mono uppercase tracking-wider block">Total Solved</span>
+              <span className="text-[20px] font-bold font-mono text-[#f0f0f0] mt-0.5 block">{problems.length}</span>
+            </div>
+          </div>
+
+          {/* Card 2: Solve Streak */}
+          <div className="bg-[#1a1a1a] border border-[#2a2a2a] p-4 hover:border-[#da7756]/30 transition-colors rounded-xl flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-[#da7756]/10 flex items-center justify-center text-[#da7756] shrink-0">
+              <Flame size={20} className={currentStreak > 0 ? "animate-pulse fill-[#da7756]/20" : ""} />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[#888888] text-[11px] font-mono uppercase tracking-wider block">Solve Streak</span>
+              <span className="text-[20px] font-bold font-mono text-[#f0f0f0] mt-0.5 block">
+                {currentStreak} <span className="text-[12px] text-[#888888] font-normal font-sans">/ {longestStreak} max</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Card 3: Avg Time */}
+          <div className="bg-[#1a1a1a] border border-[#2a2a2a] p-4 hover:border-[#da7756]/30 transition-colors rounded-xl flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-[#da7756]/10 flex items-center justify-center text-[#da7756] shrink-0">
+              <Clock size={20} />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[#888888] text-[11px] font-mono uppercase tracking-wider block">Avg Solve Time</span>
+              <span className="text-[20px] font-bold font-mono text-[#f0f0f0] mt-0.5 block">
+                {averageTime} <span className="text-[12px] text-[#888888] font-normal font-sans">mins</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Card 4: Topic Analytics */}
+          <div className="bg-[#1a1a1a] border border-[#2a2a2a] p-4 hover:border-[#da7756]/30 transition-colors rounded-xl flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-[#da7756]/10 flex items-center justify-center text-[#da7756] shrink-0">
+              <Zap size={20} />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[#888888] text-[11px] font-mono uppercase tracking-wider block">Top Subject</span>
+              <span className="text-[14px] font-bold text-[#f0f0f0] mt-0.5 block truncate" title={strongestTopic}>
+                {strongestTopic === 'None' ? 'N/A' : strongestTopic}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* Dynamic Badges & mini Heatmap */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 select-none">
+          {/* Achievements & Badges List */}
+          <div className="lg:col-span-2 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-5 hover:border-[#da7756]/30 transition-colors">
+            <div className="flex items-center gap-2 border-b border-[#2a2a2a] pb-3 mb-4">
+              <Award size={16} className="text-[#da7756]" />
+              <h3 className="text-[14px] font-bold font-mono text-[#f0f0f0] uppercase tracking-wider">Achievements & Badges</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {badgesList.map(badge => (
+                <div 
+                  key={badge.id}
+                  className={`p-3.5 rounded-xl border flex items-start gap-3.5 transition-all duration-300 relative overflow-hidden ${
+                    badge.unlocked 
+                      ? 'bg-[#da7756]/5 border-[#da7756]/30 shadow-[0_0_15px_rgba(218,119,86,0.05)] hover:border-[#da7756]/60' 
+                      : 'bg-[#131313]/50 border-[#2a2a2a] opacity-60'
+                  }`}
+                >
+                  <div className={`text-[26px] shrink-0 p-1.5 rounded-xl ${badge.unlocked ? 'bg-[#da7756]/10' : 'bg-[#0d0d0d]'}`}>
+                    {badge.icon}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <h4 className={`text-[13.5px] font-bold font-sans tracking-wide ${badge.unlocked ? 'text-[#f0f0f0]' : 'text-[#888888]'}`}>
+                        {badge.title}
+                      </h4>
+                      {badge.unlocked ? (
+                        <span className="text-[9px] font-mono text-[#4caf7d] bg-[#4caf7d]/10 px-1.5 py-0.5 rounded-sm uppercase tracking-wider font-bold">UNLOCKED</span>
+                      ) : (
+                        <span className="text-[9px] font-mono text-[#666666] bg-[#2a2a2a] px-1.5 py-0.5 rounded-sm uppercase tracking-wider">LOCKED</span>
+                      )}
+                    </div>
+                    <p className="text-[#888888] text-[11.5px] mt-1 font-sans leading-relaxed">
+                      {badge.desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Consistency Mini-Heatmap */}
+          <div className="lg:col-span-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-5 hover:border-[#da7756]/30 transition-colors flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-[#2a2a2a] pb-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <Activity size={16} className="text-[#da7756]" />
+                  <h3 className="text-[14px] font-bold font-mono text-[#f0f0f0] uppercase tracking-wider">Consistency</h3>
+                </div>
+                <span className="text-[#888888] text-[11px] font-mono">
+                  {new Date().toLocaleString('default', { month: 'short' })} {new Date().getFullYear()}
+                </span>
+              </div>
+
+              {/* Compact calendar grid (smaller calendar circles) */}
+              <div className="grid grid-cols-7 gap-2.5 justify-items-center">
+                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((wd, i) => (
+                  <span key={i} className="text-[#444444] text-[10px] font-mono font-bold select-none">{wd}</span>
+                ))}
+                {(() => {
+                  const today = new Date();
+                  const year = today.getFullYear();
+                  const month = today.getMonth();
+                  const firstDay = new Date(year, month, 1).getDay();
+                  const totalDays = new Date(year, month + 1, 0).getDate();
+                  const cells = [];
+                  
+                  for (let i = 0; i < firstDay; i++) {
+                    cells.push(<div key={`p-${i}`} className="w-[20px] h-[20px] rounded bg-[#0d0d0d] border border-transparent" />);
+                  }
+
+                  for (let day = 1; day <= totalDays; day++) {
+                    const dateStr = getLocalDateString(new Date(year, month, day));
+                    const isToday = dateStr === getLocalDateString();
+                    const daySolves = problems.filter(p => p.solvedDate === dateStr);
+                    let color = 'bg-[#131313] hover:border-[#2a2a2a]';
+                    let titleVal = `${day} Solved: 0`;
+
+                    if (daySolves.length > 0) {
+                      const hasRevisit = daySolves.some(p => p.revisit);
+                      const hasPartial = daySolves.some(p => p.partial);
+                      if (hasRevisit) {
+                        color = 'bg-[#f0c040] shadow-[0_0_8px_rgba(240,192,64,0.3)]';
+                        titleVal = `${day} Solved: Revisited (Yellow)`;
+                      } else if (hasPartial) {
+                        color = 'bg-gradient-to-tr from-[#ff6b35] from-50% to-[#1a1a1a] to-50% border border-[#ff6b35]/30 shadow-[0_0_8px_rgba(255,107,53,0.3)]';
+                        titleVal = `${day} Solved: Incomplete (Orange Gradient)`;
+                      } else {
+                        const count = daySolves.length;
+                        if (count === 1) {
+                          color = 'bg-[#ff6b35]/40 border border-[#ff6b35]/25';
+                        } else if (count === 2) {
+                          color = 'bg-[#ff6b35]/70 shadow-[0_0_6px_rgba(255,107,53,0.4)]';
+                        } else {
+                          color = 'bg-[#ff6b35] shadow-[0_0_10px_rgba(255,107,53,0.6)]';
+                        }
+                        titleVal = `${day} Solved: ${count}`;
+                      }
+                    }
+
+                    cells.push(
+                      <div 
+                        key={day}
+                        title={titleVal}
+                        className={`w-[20px] h-[20px] rounded text-[9px] font-mono flex items-center justify-center transition-all cursor-default select-none ${color} ${
+                          isToday ? 'ring-1 ring-white ring-offset-1 ring-offset-[#1a1a1a]' : 'border border-[#2a2a2a]'
+                        }`}
+                      >
+                        {day}
+                      </div>
+                    );
+                  }
+                  return cells;
+                })()}
+              </div>
+            </div>
+
+            {/* Performance quote or ranking */}
+            <div className="mt-4 pt-4 border-t border-[#2a2a2a]/60 text-center font-mono">
+              <span className="text-[10px] text-[#888888] uppercase block tracking-wider">Algorithmic Focus</span>
+              <p className="text-[12px] text-[#da7756] font-bold mt-1 leading-relaxed">
+                {problems.length > 0 
+                  ? `Strongest subject: ${strongestTopic}. Weakest: ${weakestTopic === 'None' ? 'N/A' : weakestTopic}.`
+                  : "Solve problems to compute analytics."
+                }
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Two-Column Bento Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           
@@ -316,7 +661,7 @@ export default function Profile() {
                     value={dailyVolume}
                     onChange={(e) => setDailyVolume(e.target.value)}
                     placeholder="3"
-                    className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-lg px-4 py-2 font-mono text-[13px] text-[#f0f0f0] placeholder:text-[#444444] focus:border-[#da7756] outline-none transition-colors"
+                    className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-lg pl-4 pr-32 py-2 font-mono text-[13px] text-[#f0f0f0] placeholder:text-[#444444] focus:border-[#da7756] outline-none transition-colors"
                   />
                   <span className="absolute right-4 font-mono text-[11px] text-[#888888] uppercase select-none pointer-events-none">
                     problems / day

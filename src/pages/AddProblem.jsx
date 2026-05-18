@@ -48,6 +48,13 @@ export default function AddProblem() {
   const [sourceLinks, setSourceLinks] = useState('');
   const [revisit, setRevisit] = useState(true);
   const [partial, setPartial] = useState(false);
+  const [solvedDate, setSolvedDate] = useState(() => {
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  });
 
   // UI States
   const [customTags, setCustomTags] = useState([]);
@@ -77,8 +84,11 @@ export default function AddProblem() {
       setSourceLinks(editingProblem.url || '');
       setRevisit(editingProblem.revisit !== undefined ? editingProblem.revisit : true);
       setPartial(editingProblem.partial || false);
+      setSolvedDate(editingProblem.solvedDate || '');
+    } else if (location.state?.prefilledDate) {
+      setSolvedDate(location.state.prefilledDate);
     }
-  }, [editingProblem]);
+  }, [editingProblem, location.state]);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -151,12 +161,12 @@ export default function AddProblem() {
         revisit,
         partial,
         nextReviewDate: formattedNextReviewDate,
+        solvedDate,
       };
 
       let updatedList;
       if (editingProblem) {
         problemData.id = editingProblem.id;
-        problemData.solvedDate = editingProblem.solvedDate;
         
         updatedList = existingProblems.map(p => p.id === editingProblem.id ? problemData : p);
         const response = await window.api.saveProblems(updatedList);
@@ -169,7 +179,6 @@ export default function AddProblem() {
         }
       } else {
         problemData.id = 'prob-' + Date.now();
-        problemData.solvedDate = new Date().toISOString().split('T')[0];
         
         updatedList = [problemData, ...existingProblems];
         const response = await window.api.saveProblems(updatedList);
@@ -189,6 +198,11 @@ export default function AddProblem() {
           setSourceLinks('');
           setRevisit(true);
           setPartial(false);
+          const today = new Date();
+          const y = today.getFullYear();
+          const m = String(today.getMonth() + 1).padStart(2, '0');
+          const d = String(today.getDate()).padStart(2, '0');
+          setSolvedDate(`${y}-${m}-${d}`);
           // Set next incremental problem ID
           setProblemId(String(updatedList.length + 1));
         } else {
@@ -425,6 +439,16 @@ export default function AddProblem() {
             {/* Card 4: Stats Spent & Star Ratings */}
             <div className="bg-[#1c1b1b] border border-[#2a2a2a] rounded-xl p-6 hover:border-[#da7756]/30 transition-colors space-y-4 select-none">
               <div>
+                <label className="font-mono text-[12px] font-medium text-[#888888] uppercase tracking-wider mb-1.5 block">Solved Date</label>
+                <input 
+                  type="date"
+                  value={solvedDate}
+                  onChange={(e) => setSolvedDate(e.target.value)}
+                  className="w-full bg-[#131313] border border-[#2a2a2a] focus:border-[#da7756] outline-none px-3 py-2 font-mono text-[13px] text-[#f0f0f0] rounded-xl transition-all cursor-pointer"
+                />
+              </div>
+
+              <div>
                 <label className="font-mono text-[12px] font-medium text-[#888888] uppercase tracking-wider mb-1.5 block">Time Spent</label>
                 <div className="relative">
                   <input 
@@ -432,7 +456,7 @@ export default function AddProblem() {
                     placeholder="0"
                     value={timeSpent}
                     onChange={(e) => setTimeSpent(e.target.value)}
-                    className="w-full bg-[#131313] border border-[#2a2a2a] focus:border-[#da7756] outline-none pr-12 px-3 py-2 font-mono text-[13px] text-[#f0f0f0] rounded-xl transition-all"
+                    className="w-full bg-[#131313] border border-[#2a2a2a] focus:border-[#da7756] outline-none pl-3 pr-16 py-2 font-mono text-[13px] text-[#f0f0f0] rounded-xl transition-all"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888888] font-mono text-[12px]">mins</span>
                 </div>

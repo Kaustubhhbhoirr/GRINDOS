@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Terminal, TrendingUp, CheckCircle2, Bookmark, ArrowRight } from 'lucide-react';
+import Editor from '@monaco-editor/react';
+import MarkdownRenderer from '../components/MarkdownRenderer';
+import { Search, Bell, TrendingUp, CheckCircle2, Bookmark, ArrowRight, X, BookOpen, Tag, Code2, AlertTriangle, Plus, Star, Clock, ExternalLink } from 'lucide-react';
+
+const getLocalDateString = (date = new Date()) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -11,6 +20,10 @@ export default function Dashboard() {
   const [weeklyCount, setWeeklyCount] = useState(0);
   const [profileName, setProfileName] = useState('Grinder');
   const [profileRank, setProfileRank] = useState('Beginner');
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedProblemForModal, setSelectedProblemForModal] = useState(null);
+  const [showGreetingBanner, setShowGreetingBanner] = useState(true);
+  const [dailyVolume, setDailyVolume] = useState(3);
 
   useEffect(() => {
     if (window.api) {
@@ -19,22 +32,51 @@ export default function Dashboard() {
         calculateStats(data || []);
       });
     }
-    // Load profile metadata
-    const stored = localStorage.getItem('grindos_profile_info');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed.name) setProfileName(parsed.name);
-        if (parsed.goal) setProfileRank(parsed.goal);
-      } catch (e) {
-        console.error(e);
+    
+    const loadProfile = () => {
+      const stored = localStorage.getItem('grindos_profile_info');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.name) setProfileName(parsed.name);
+          if (parsed.goal) setProfileRank(parsed.goal);
+          if (parsed.dailyVolume) setDailyVolume(Number(parsed.dailyVolume) || 3);
+        } catch (e) {
+          console.error(e);
+        }
       }
-    }
+    };
+
+    loadProfile();
+
+    window.addEventListener('storage', loadProfile);
+    return () => window.removeEventListener('storage', loadProfile);
   }, []);
+
+  const handleToggleRevisit = async (probId) => {
+    if (!window.api) return;
+    const updated = problems.map(p => {
+      if (p.id === probId) {
+        return { ...p, revisit: !p.revisit };
+      }
+      return p;
+    });
+    setProblems(updated);
+    calculateStats(updated);
+    await window.api.saveProblems(updated);
+    
+    // Also update the selectedProblemForModal state so the UI updates in the modal immediately!
+    setSelectedProblemForModal(prev => {
+      if (prev && prev.id === probId) {
+        return { ...prev, revisit: !prev.revisit };
+      }
+      return prev;
+    });
+  };
 
   const calculateStats = (allProblems) => {
     // 1. Due count
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getLocalDateString();
     const due = allProblems.filter(p => p.nextReviewDate <= todayStr && p.revisit).length;
     setDueCount(due);
 
@@ -54,10 +96,10 @@ export default function Dashboard() {
   const calculateStreak = (allProblems) => {
     if (allProblems.length === 0) return 0;
     const solvedDates = [...new Set(allProblems.map(p => p.solvedDate))].sort((a, b) => b.localeCompare(a));
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getLocalDateString();
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    const yesterdayStr = getLocalDateString(yesterday);
 
     if (solvedDates[0] !== todayStr && solvedDates[0] !== yesterdayStr) {
       return 0;
@@ -70,7 +112,7 @@ export default function Dashboard() {
     }
 
     while (true) {
-      const checkStr = checkDate.toISOString().split('T')[0];
+      const checkStr = getLocalDateString(checkDate);
       if (solvedDates.includes(checkStr)) {
         currentStreak++;
         checkDate.setDate(checkDate.getDate() - 1);
@@ -128,7 +170,7 @@ export default function Dashboard() {
     // Add actual days
     for (let day = 1; day <= totalDaysInMonth; day++) {
       const currentDate = new Date(year, month, day);
-      const dateStr = currentDate.toISOString().split('T')[0];
+      const dateStr = getLocalDateString(currentDate);
       const daySolves = problems.filter(p => p.solvedDate === dateStr);
       cells.push({ day, dateStr, solves: daySolves });
     }
@@ -155,9 +197,29 @@ export default function Dashboard() {
     .sort((a, b) => b.solvedDate.localeCompare(a.solvedDate))
     .slice(0, 5);
 
+  // Time of day greeting and nudge metrics
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+
+  const getGreetingIcon = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return '☀️';
+    if (hour < 17) return '🌤️';
+    return '🌙';
+  };
+
+  const todayStr = getLocalDateString();
+  const solvedTodayCount = problems.filter(p => p.solvedDate === todayStr && !p.partial).length;
+  const revisitCount = problems.filter(p => p.revisit).length;
+
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#0d0d0d] text-[#f0f0f0] font-sans selection:bg-[#da7756]/20 selection:text-white">
-      {/* Top Bar Header (Matches Stitch layout) */}
+    <div className="flex-1 flex flex-row h-full bg-[#0d0d0d] text-[#f0f0f0] font-sans selection:bg-[#da7756]/20 selection:text-white overflow-hidden relative">
+      <div className="flex-1 flex flex-col h-full overflow-y-auto">
+        {/* Top Bar Header (Matches Stitch layout) */}
       <header className="flex justify-between items-center w-full px-6 h-14 bg-[#131313] border-b border-[#2a2a2a] shrink-0 select-none">
         <div className="flex items-center gap-4 w-1/3">
           <div className="md:hidden flex items-center">
@@ -185,13 +247,6 @@ export default function Dashboard() {
               <span className="absolute -top-1 -right-1 bg-[#da7756] w-2 h-2 rounded-full animate-ping"></span>
             )}
           </button>
-          <button 
-            onClick={() => navigate('/panel')}
-            className="text-[#888888] hover:text-[#da7756] transition-colors"
-            title="Terminal Companion"
-          >
-            <Terminal size={20} />
-          </button>
         </div>
       </header>
 
@@ -206,6 +261,78 @@ export default function Dashboard() {
             </p>
           </div>
         </div>
+
+        {/* Personalized Greeting Banner */}
+        {showGreetingBanner && (
+          <div className="bg-gradient-to-r from-[#1a1a1a] via-[#201c1a] to-[#1a1a1a] border border-[#ff6b35]/20 hover:border-[#ff6b35]/40 transition-all rounded-xl p-5 relative shadow-[0_4px_20px_rgba(0,0,0,0.4)] animate-in fade-in slide-in-from-top duration-300 select-none">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowGreetingBanner(false)}
+              className="absolute top-4 right-4 text-[#888888] hover:text-[#f0f0f0] p-1.5 hover:bg-[#2a2a2a] rounded-lg transition-all cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+
+            {/* Greeting Header */}
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-[24px]">{getGreetingIcon()}</span>
+              <div>
+                <h2 className="text-[20px] font-bold text-[#f0f0f0]">
+                  {getGreeting()}, <span className="text-[#ff6b35]">{profileName}</span>!
+                </h2>
+                <p className="text-[#888888] text-[12px] font-mono mt-0.5">
+                  Welcome back to your workspace. Let's conquer today's target!
+                </p>
+              </div>
+            </div>
+
+            {/* Nudges Container */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-[#2a2a2a]/60 pt-4">
+              {/* Nudge 1: Revisit Queue */}
+              <div className="bg-[#0f0f0f] border border-[#2a2a2a] p-3.5 rounded-lg flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <span className="text-[10px] font-mono uppercase text-[#ff6b35]/80 font-bold block mb-1">REVISIT QUEUE</span>
+                  <p className="text-[13px] text-[#e0e0e0] leading-snug">
+                    {revisitCount > 0 
+                      ? `You have ${revisitCount} problem${revisitCount > 1 ? 's' : ''} marked for revisit — ready to master them?`
+                      : 'All clean! No problems currently pending in your review queue.'
+                    }
+                  </p>
+                </div>
+                {revisitCount > 0 && (
+                  <button
+                    onClick={() => navigate('/revisit')}
+                    className="shrink-0 bg-[#ff6b35] hover:bg-[#ff8c5a] text-[#0d0d0d] font-mono text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1 hover:shadow-[0_0_8px_rgba(255,107,53,0.3)]"
+                  >
+                    Review <ArrowRight size={11} />
+                  </button>
+                )}
+              </div>
+
+              {/* Nudge 2: Daily Target */}
+              <div className="bg-[#0f0f0f] border border-[#2a2a2a] p-3.5 rounded-lg flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <span className="text-[10px] font-mono uppercase text-[#4caf7d] font-bold block mb-1">DAILY TARGET</span>
+                  <p className="text-[13px] text-[#e0e0e0] leading-snug">
+                    Daily Goal: solved <strong className="text-[#4caf7d]">{solvedTodayCount} of {dailyVolume}</strong> problems today.
+                    {solvedTodayCount >= dailyVolume 
+                      ? ' Target achieved! 🚀 Keep it going!' 
+                      : ` Let's push to log ${dailyVolume - solvedTodayCount} more!`
+                    }
+                  </p>
+                </div>
+                {solvedTodayCount < dailyVolume && (
+                  <button
+                    onClick={() => navigate('/add')}
+                    className="shrink-0 border border-[#4caf7d]/50 hover:border-[#4caf7d] text-[#4caf7d] bg-[#4caf7d]/5 hover:bg-[#4caf7d]/10 font-mono text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    Solve <Plus size={11} />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Stats Grid Row */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6 select-none">
@@ -276,35 +403,44 @@ export default function Dashboard() {
                   );
                 }
 
-                const todayStr = new Date().toISOString().split('T')[0];
+                const todayStr = getLocalDateString();
                 const isToday = cell.dateStr === todayStr;
 
-                // Color-coding depending on solves difficulty
-                let colorClass = 'bg-[#0e0e0e] text-[#888888]'; // Default empty
-                let solveBadge = '';
+                // Color-coding depending on activity type
+                let colorClass = 'bg-[#1a1a1a] text-[#888888] hover:border-[#2a2a2a] hover:bg-[#202020]'; // Default empty
+                let solveBadge = 'No activity';
 
                 if (cell.solves.length > 0) {
-                  // Find the highest difficulty solved on this day (hard > medium > easy)
-                  const hasHard = cell.solves.some(p => p.difficulty === 'hard');
-                  const hasMedium = cell.solves.some(p => p.difficulty === 'medium');
-                  
-                  if (hasHard) {
-                    colorClass = 'bg-[#e05555] text-white font-bold';
-                    solveBadge = 'Hard solved';
-                  } else if (hasMedium) {
-                    colorClass = 'bg-[#f0a030] text-white font-bold';
-                    solveBadge = 'Medium solved';
+                  const hasRevisit = cell.solves.some(p => p.revisit);
+                  const hasPartial = cell.solves.some(p => p.partial);
+
+                  if (hasRevisit) {
+                    colorClass = 'bg-[#f0c040] text-[#0d0d0d] font-bold hover:shadow-[0_0_12px_rgba(240,192,64,0.4)]';
+                    solveBadge = 'Revisited (Yellow)';
+                  } else if (hasPartial) {
+                    colorClass = 'bg-gradient-to-tr from-[#ff6b35] from-50% to-[#1a1a1a] to-50% text-white font-bold border border-[#ff6b35]/45 hover:shadow-[0_0_12px_rgba(255,107,53,0.4)]';
+                    solveBadge = 'Partial attempt';
                   } else {
-                    colorClass = 'bg-[#4caf7d] text-white font-bold';
-                    solveBadge = 'Easy solved';
+                    const count = cell.solves.length;
+                    if (count === 1) {
+                      colorClass = 'bg-[#ff6b35]/30 text-[#f0f0f0] font-bold border border-[#ff6b35]/25 hover:border-[#ff6b35]/60 hover:shadow-[0_0_8px_rgba(255,107,53,0.3)]';
+                      solveBadge = '1 problem solved (Low activity)';
+                    } else if (count === 2) {
+                      colorClass = 'bg-[#ff6b35]/65 text-white font-bold border border-[#ff6b35]/45 hover:shadow-[0_0_12px_rgba(255,107,53,0.5)]';
+                      solveBadge = '2 problems solved (Medium activity)';
+                    } else {
+                      colorClass = 'bg-[#ff6b35] text-[#0d0d0d] font-black hover:shadow-[0_0_18px_rgba(255,107,53,0.7)]';
+                      solveBadge = `${count} problems solved (High activity)`;
+                    }
                   }
                 }
 
                 return (
                   <div
                     key={`day-${cell.day}`}
-                    title={cell.solves.length > 0 ? `${cell.day} ${currentMonthName}: ${cell.solves.length} problem(s) solved (${solveBadge})` : `${cell.day} ${currentMonthName}`}
-                    className={`w-[50px] h-[50px] md:w-[60px] md:h-[60px] rounded-xl flex items-center justify-center text-[14px] transition-all hover:scale-105 ${colorClass} ${
+                    title={cell.solves.length > 0 ? `${cell.day} ${currentMonthName}: ${cell.solves.length} problem(s) [${solveBadge}]` : `${cell.day} ${currentMonthName}`}
+                    onClick={() => setSelectedDate(cell.dateStr)}
+                    className={`w-[50px] h-[50px] md:w-[60px] md:h-[60px] rounded-xl flex items-center justify-center text-[14px] transition-all hover:scale-105 cursor-pointer ${colorClass} ${
                       isToday ? 'border-2 border-white shadow-[0_0_12px_rgba(255,255,255,0.3)]' : 'border border-[#2a2a2a]'
                     }`}
                   >
@@ -352,7 +488,7 @@ export default function Dashboard() {
                     className="flex px-6 py-3 border-b border-[#2a2a2a] items-center hover:bg-[#222222] transition-colors group cursor-pointer"
                   >
                     <div className="w-16 text-[13px] font-mono text-[#888888]">
-                      #{String(i + 1).padStart(3, '0')}
+                      #{prob.problemId || String(i + 1).padStart(3, '0')}
                     </div>
                     <div className="flex-1 text-[#f0f0f0] font-medium group-hover:text-[#da7756] transition-colors truncate pr-4">
                       {prob.title}
@@ -474,6 +610,309 @@ export default function Dashboard() {
           </section>
         </div>
       </main>
+      </div>
+
+      {/* Slide-in Daily Solves Side Panel */}
+      {selectedDate && (() => {
+        const dailySolves = problems.filter(p => p.solvedDate === selectedDate);
+        return (
+          <div className="w-[35%] min-w-[320px] max-w-[480px] shrink-0 h-full border-l border-[#2a2a2a] bg-[#1a1a1a] flex flex-col hover:border-[#da7756]/10 transition-all select-text overflow-hidden z-50 shadow-2xl animate-in slide-in-from-right duration-300">
+            {/* Header */}
+            <div className="p-5 border-b border-[#2a2a2a] bg-[#1a1a1a] flex justify-between items-center shrink-0 select-none">
+              <div className="flex flex-col select-none">
+                <span className="font-mono text-[10px] font-bold text-[#888888] uppercase tracking-wider">PROBLEMS SOLVED ON</span>
+                <h3 className="font-mono text-[18px] md:text-[22px] font-bold text-[#da7756] border-b-2 border-[#da7756] pb-1.5 w-fit tracking-wide mb-1">
+                  {selectedDate}
+                </h3>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => navigate('/add', { state: { prefilledDate: selectedDate } })}
+                  className="bg-[#da7756]/10 hover:bg-[#da7756]/20 border border-[#da7756]/30 text-[#da7756] p-1.5 rounded-lg transition-all cursor-pointer hover:scale-105"
+                  title="Log problem for this day"
+                >
+                  <Plus size={16} />
+                </button>
+                <button
+                  onClick={() => setSelectedDate(null)}
+                  className="text-[#888888] hover:text-[#f0f0f0] p-1.5 hover:bg-[#2a2a2a] rounded transition-all cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Drawer Content */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              {dailySolves.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center py-20 select-none">
+                  <svg className="w-20 h-20 text-[#444444] mb-4 opacity-50 animate-pulse" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M10 10 L90 90" />
+                    <path d="M90 10 L10 90" />
+                    <path d="M50 10 L50 90" />
+                    <path d="M10 50 L90 50" />
+                    <path d="M30 30 Q50 40 70 30 Q60 50 70 70 Q50 60 30 70 Q40 50 30 30 Z" />
+                    <path d="M20 20 Q50 35 80 20 Q65 50 80 80 Q50 65 20 80 Q35 50 20 20 Z" />
+                    <path d="M40 40 Q50 45 60 40 Q55 50 60 60 Q50 55 40 60 Q45 50 40 40 Z" />
+                  </svg>
+                  <span className="text-[14px] font-mono text-[#888888] italic">nothing here... yet</span>
+                  <span className="text-[11px] text-[#444444] mt-2 font-mono uppercase tracking-wider">Keep on grinding!</span>
+                </div>
+              ) : (
+                dailySolves.map((prob, idx) => {
+                  const stars = Array.from({ length: 5 }, (_, i) => i + 1);
+                  return (
+                    <div 
+                      key={prob.id || idx}
+                      onClick={() => {
+                        setSelectedProblemForModal(prob);
+                      }}
+                      className="bg-[#0d0d0d] border border-[#2a2a2a] hover:border-[#da7756]/80 p-4 rounded-xl transition-all duration-300 cursor-pointer select-none group flex flex-col gap-3 relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-[#da7756]/[0.01] rounded-full blur-2xl pointer-events-none group-hover:bg-[#da7756]/[0.03] transition-all duration-500" />
+                      
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex flex-col gap-1 min-w-0">
+                          <h4 className="font-bold text-[15px] text-[#f0f0f0] group-hover:text-[#da7756] transition-colors leading-snug truncate">
+                            {prob.title}
+                          </h4>
+                          
+                          <div className="flex gap-0.5">
+                            {stars.map((star) => (
+                              <Star 
+                                key={star} 
+                                size={11} 
+                                className={star <= (prob.confidence || 3) ? 'text-[#da7756] fill-[#da7756]' : 'text-[#333333]'} 
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        <span className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded-lg uppercase shrink-0 border tracking-wider ${
+                          prob.difficulty === 'easy' 
+                            ? 'bg-[#1a3a2a]/40 text-[#4caf7d] border-[#4caf7d]/30' 
+                            : prob.difficulty === 'medium'
+                              ? 'bg-[#3a2a0a]/40 text-[#f0a030] border-[#f0a030]/30'
+                              : 'bg-[#3a1a1a]/40 text-[#e05555] border-[#e05555]/30'
+                        }`}>
+                          {prob.difficulty}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1.5">
+                        <span className="bg-[#1a1a1a] px-2 py-0.5 border border-[#2a2a2a] rounded-md text-[11px] text-[#888888] font-mono flex items-center gap-1 group-hover:border-[#da7756]/30 transition-colors">
+                          <Tag size={10} className="text-[#da7756]" />
+                          {prob.category}
+                        </span>
+                        {prob.tags && prob.tags.filter(t => t !== prob.category).slice(0, 1).map(tag => (
+                          <span key={tag} className="bg-[#1a1a1a] px-2 py-0.5 border border-[#2a2a2a] rounded-md text-[11px] text-[#888888] font-mono flex items-center gap-1 group-hover:border-[#da7756]/30 transition-colors">
+                            <Tag size={10} className="text-[#da7756]/50" />
+                            {tag}
+                          </span>
+                        ))}
+                        <span className="bg-[#1a1a1a] px-2 py-0.5 border border-[#2a2a2a] rounded-md text-[11px] text-[#888888] font-mono uppercase flex items-center gap-1 group-hover:border-[#da7756]/30 transition-colors">
+                          <Code2 size={10} className="text-[#da7756]" />
+                          {prob.language}
+                        </span>
+                      </div>
+
+                      <div className="h-[1px] bg-[#2a2a2a]/60 w-full group-hover:bg-[#da7756]/20 transition-colors" />
+
+                      <div className="flex items-center justify-between text-[11px] font-mono text-[#888888]">
+                        <div className="flex items-center gap-1.5">
+                          <Clock size={11} className="text-[#da7756]" />
+                          <span>Time Spent:</span>
+                          <span className="text-[#f0f0f0] font-semibold">{prob.timeSpent || 0} mins</span>
+                        </div>
+                        {prob.revisit && (
+                          <span className="text-[10px] text-[#f0a030] bg-[#f0a030]/10 border border-[#f0a030]/20 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                            REVISIT
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Problem Details Modal */}
+      {selectedProblemForModal && (
+        <div className="fixed inset-0 bg-[#0d0d0d]/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-3xl bg-[#1a1a1a] border border-[#2a2a2a] shadow-2xl rounded-2xl flex flex-col hover:border-[#ff8c5a]/30 transition-all overflow-hidden max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-[#2a2a2a] bg-[#131313] flex justify-between items-center select-none shrink-0">
+              <div className="flex flex-col gap-1.5 min-w-0">
+                <span className="font-mono text-[10px] text-[#ff8c5a] uppercase tracking-wider font-bold">PROBLEM DETAILS</span>
+                <h2 className="text-[20px] font-bold text-[#f0f0f0] tracking-tight truncate leading-snug flex items-center gap-2">
+                  {selectedProblemForModal.problemId && (
+                    <span className="text-[#ff8c5a] font-mono bg-[#ff8c5a]/10 px-2 py-0.5 border border-[#ff8c5a]/20 rounded-md text-[13px]">
+                      #{selectedProblemForModal.problemId}
+                    </span>
+                  )}
+                  {selectedProblemForModal.title}
+                </h2>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-[10px] font-mono text-[#888888] uppercase mr-1">Self Rating:</span>
+                  {Array.from({ length: 5 }, (_, i) => i + 1).map((star) => (
+                    <Star 
+                      key={star} 
+                      size={13} 
+                      className={star <= (selectedProblemForModal.confidence || 3) ? 'text-[#f0c040] fill-[#f0c040]' : 'text-[#333333]'} 
+                    />
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4 shrink-0 ml-4">
+                {/* Revisit Toggle Switch */}
+                <div className="flex items-center gap-2.5 border border-[#2a2a2a] bg-[#131313] px-3 py-1.5 rounded-xl select-none">
+                  <span className="text-[11px] font-mono text-[#888888] uppercase font-bold">Revisit Required</span>
+                  <button
+                    onClick={() => handleToggleRevisit(selectedProblemForModal.id)}
+                    className={`w-9 h-5 flex items-center rounded-full p-0.5 cursor-pointer transition-all duration-300 ${
+                      selectedProblemForModal.revisit ? 'bg-[#f0c040]' : 'bg-[#2a2a2a]'
+                    }`}
+                  >
+                    <div
+                      className={`bg-[#0d0d0d] w-4 h-4 rounded-full shadow-md transform transition-all duration-300 ${
+                        selectedProblemForModal.revisit ? 'translate-x-4' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                <span className={`text-[10px] font-mono font-medium px-2.5 py-1 rounded-lg uppercase border tracking-wider select-none ${
+                  selectedProblemForModal.difficulty === 'easy' 
+                    ? 'bg-[#1a3a2a]/40 text-[#4caf7d] border-[#4caf7d]/30' 
+                    : selectedProblemForModal.difficulty === 'medium'
+                      ? 'bg-[#3a2a0a]/40 text-[#f0a030] border-[#f0a030]/30'
+                      : 'bg-[#3a1a1a]/40 text-[#e05555] border-[#e05555]/30'
+                }`}>
+                  {selectedProblemForModal.difficulty}
+                </span>
+                <button
+                  onClick={() => setSelectedProblemForModal(null)}
+                  className="text-[#888888] hover:text-[#f0f0f0] p-1.5 hover:bg-[#2a2a2a] rounded-lg transition-all cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Scrollable content */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Meta stats row */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[12px] font-mono text-[#888888] select-none">
+                <div className="bg-[#131313] p-3.5 rounded-xl border border-[#2a2a2a] flex flex-col gap-1.5">
+                  <span className="text-[10px] uppercase text-[#444444]">Category</span>
+                  <span className="text-[#f0f0f0] font-semibold truncate">{selectedProblemForModal.category}</span>
+                </div>
+                <div className="bg-[#131313] p-3.5 rounded-xl border border-[#2a2a2a] flex flex-col gap-1.5">
+                  <span className="text-[10px] uppercase text-[#444444]">Language</span>
+                  <span className="text-[#f0f0f0] font-semibold uppercase">{selectedProblemForModal.language}</span>
+                </div>
+                <div className="bg-[#131313] p-3.5 rounded-xl border border-[#2a2a2a] flex flex-col gap-1.5">
+                  <span className="text-[10px] uppercase text-[#444444]">Time Spent</span>
+                  <span className="text-[#ff8c5a] font-semibold">{selectedProblemForModal.timeSpent || 0} mins</span>
+                </div>
+                <div className="bg-[#131313] p-3.5 rounded-xl border border-[#2a2a2a] flex flex-col gap-1.5">
+                  <span className="text-[10px] uppercase text-[#444444]">Solved Date</span>
+                  <span className="text-[#f0f0f0] font-semibold">{selectedProblemForModal.solvedDate}</span>
+                </div>
+              </div>
+
+              {/* Tags Section */}
+              {selectedProblemForModal.tags && selectedProblemForModal.tags.length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-[11px] font-mono text-[#888888] uppercase block select-none">Tags</span>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProblemForModal.tags.map((tag) => (
+                      <span key={tag} className="bg-[#131313] px-3 py-1 border border-[#2a2a2a] rounded-lg text-[12px] font-mono text-[#f0f0f0] hover:border-[#ff8c5a]/40 transition-all select-none">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Source/Leetcode external link button */}
+              {selectedProblemForModal.url && (
+                <div className="space-y-2">
+                  <span className="text-[11px] font-mono text-[#888888] uppercase block select-none">External Link</span>
+                  <button 
+                    onClick={() => {
+                      if (window.api?.openExternal) window.api.openExternal(selectedProblemForModal.url);
+                    }}
+                    className="flex items-center gap-2 bg-[#131313] hover:bg-[#ff8c5a]/10 border border-[#2a2a2a] hover:border-[#ff8c5a]/40 text-[#ff8c5a] font-mono text-[13px] px-4 py-2.5 rounded-xl transition-all cursor-pointer w-full justify-center md:w-fit font-bold hover:shadow-[0_0_12px_rgba(255,140,90,0.1)]"
+                  >
+                    Solve on Leetcode <ExternalLink size={14} />
+                  </button>
+                </div>
+              )}
+
+              {/* Notes / Insights - Full text not truncated */}
+              {selectedProblemForModal.notes && (
+                <div className="space-y-2">
+                  <span className="text-[11px] font-mono text-[#888888] uppercase block select-none">Algorithmic Notes & Approach</span>
+                  <div className="p-5 bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl text-[14px] leading-relaxed text-[#f0f0f0]">
+                    <MarkdownRenderer content={selectedProblemForModal.notes} />
+                  </div>
+                </div>
+              )}
+
+              {/* Solution Code */}
+              {selectedProblemForModal.code && (
+                <div className="space-y-2">
+                  <span className="text-[11px] font-mono text-[#888888] uppercase block select-none">Solution Code</span>
+                  <div className="border border-[#2a2a2a] rounded-xl overflow-hidden py-2 bg-[#0d0d0d]">
+                    <Editor
+                      height="260px"
+                      theme="vs-dark"
+                      language={selectedProblemForModal.language}
+                      value={selectedProblemForModal.code}
+                      options={{
+                        readOnly: true,
+                        minimap: { enabled: false },
+                        scrollbar: { vertical: 'visible', horizontal: 'visible' },
+                        fontSize: 13,
+                        lineNumbers: 'on',
+                        automaticLayout: true,
+                        fontFamily: 'JetBrains Mono, Courier New, monospace',
+                        domReadOnly: true
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Actions */}
+            <div className="p-4 border-t border-[#2a2a2a] bg-[#131313] flex justify-end items-center gap-3 select-none shrink-0">
+              <button
+                onClick={() => setSelectedProblemForModal(null)}
+                className="border border-[#2a2a2a] hover:border-[#888888] text-[#888888] hover:text-[#f0f0f0] font-mono text-[12px] px-5 py-2.5 rounded-xl transition-all cursor-pointer font-bold"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  const prob = selectedProblemForModal;
+                  setSelectedProblemForModal(null);
+                  navigate('/add', { state: { editProblem: prob } });
+                }}
+                className="bg-[#ff8c5a] hover:bg-[#ffb59d] text-[#0d0d0d] font-mono text-[12px] px-5 py-2.5 rounded-xl transition-all cursor-pointer font-bold border border-[#ff8c5a] hover:shadow-[0_0_12px_rgba(255,140,90,0.4)]"
+              >
+                Edit Problem
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,11 +1,10 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { LayoutGrid, PlusSquare, Terminal, RefreshCw, User, Search, Settings } from 'lucide-react';
+import { LayoutGrid, PlusSquare, RefreshCw, User, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const navItems = [
   { icon: LayoutGrid, path: '/', label: 'Dashboard' },
   { icon: PlusSquare, path: '/add', label: 'Add Problem' },
-  { icon: Terminal, path: '/panel', label: 'Side Panel' },
   { icon: RefreshCw, path: '/revisit', label: 'Revisit Queue' },
   { icon: Search, path: '/search', label: 'Search' },
   { icon: User, path: '/profile', label: 'Profile' },
@@ -14,8 +13,7 @@ const navItems = [
 export default function Layout() {
   const [userName, setUserName] = useState('Grinder');
 
-  useEffect(() => {
-    // Load name from profile info if it exists
+  const loadProfileName = () => {
     const stored = localStorage.getItem('grindos_profile_info');
     if (stored) {
       try {
@@ -25,15 +23,45 @@ export default function Layout() {
         console.error(e);
       }
     }
-  }, []);
+  };
+
+  useEffect(() => {
+    loadProfileName();
+
+    // Setup 1-second interval to check if profile name updated elsewhere
+    const interval = setInterval(() => {
+      const stored = localStorage.getItem('grindos_profile_info');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.name && parsed.name !== userName) {
+            setUserName(parsed.name);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }, 1000);
+
+    // Listen to local storage events too for instant sync
+    window.addEventListener('storage', loadProfileName);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', loadProfileName);
+    };
+  }, [userName]);
 
   const getInitials = (name) => {
-    if (!name) return 'GO';
-    const parts = name.trim().split(/\s+/);
+    if (!name) return 'GR';
+    const cleanName = name.trim();
+    const parts = cleanName.split(/\s+/);
     if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
+      const first = parts[0][0] || '';
+      const last = parts[parts.length - 1][0] || '';
+      return (first + last).toUpperCase();
     }
-    return name.slice(0, 2).toUpperCase();
+    return cleanName.slice(0, 2).toUpperCase();
   };
 
   return (
@@ -79,17 +107,6 @@ export default function Layout() {
 
         {/* Bottom Menu & Avatar Profile */}
         <div className="mt-auto flex flex-col items-center gap-4 pb-6 w-full">
-          <NavLink
-            to="/profile"
-            title="Settings"
-            className={({ isActive }) =>
-              `flex items-center justify-center w-full py-3 transition-colors ${
-                isActive ? 'text-[#da7756]' : 'text-[#888888] hover:text-[#f0f0f0] hover:bg-[#1a1a1a]'
-              }`
-            }
-          >
-            <Settings size={20} />
-          </NavLink>
           <div className="px-2">
             <NavLink 
               to="/profile"
@@ -110,4 +127,3 @@ export default function Layout() {
     </div>
   );
 }
-
