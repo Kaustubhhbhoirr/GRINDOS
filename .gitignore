@@ -25,3 +25,4 @@ problems.json
 *.njsproj
 *.sln
 *.sw?
+release/
