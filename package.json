@@ -17,24 +17,29 @@
     "appId": "com.grindos.app",
     "productName": "GrindOS",
     "directories": {
-      "output": "release"
+      "output": "release-build"
     },
     "files": [
       "dist/**/*",
       "electron/**/*",
+      "public/**/*",
       "package.json"
     ],
     "win": {
-      "target": "nsis",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "public/icon.png"
     },
     "nsis": {
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "public/icon.png",
-      "uninstallerIcon": "public/icon.png",
-      "installerHeaderIcon": "public/icon.png",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "GrindOS"
