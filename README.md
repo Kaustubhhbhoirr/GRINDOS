@@ -90,14 +90,16 @@ Everything stays on your machine. GrindOS is 100% offline — no accounts, no te
 
 ---
 
+<div align="center">
+
 ## About the Developer
 
-Made by **Kaustubh Bhoir** 
+Made by **Kaustubh Bhoir** <br />
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Kaustubh%20Bhoir-0077B5?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/kaustubh-bhoir-ce/)
 [![GitHub](https://img.shields.io/badge/GitHub-Kaustubhhbhoirr-181717?style=for-the-badge&logo=github)](https://github.com/Kaustubhhbhoirr)
 
 ---
 
-<div align="center">
 <sub>GrindOS • Built with 🔥 for the grind</sub>
+
 </div>
