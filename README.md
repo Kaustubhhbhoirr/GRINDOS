@@ -51,6 +51,8 @@ Made by **Kaustubh Bhoir**, FY CS student — because I needed this tool and it 
 
 👉 **[Download GrindOS-Setup.exe](https://github.com/Kaustubhhbhoirr/GRINDOS/releases)**
 
+> **⚠️ Windows SmartScreen Warning:** Windows may show a security warning when running the installer. This is normal for unsigned open source apps. Click **"More info"** → **"Run anyway"** to proceed. Your machine is safe.
+
 Double-click and install. No Node.js, no setup, no account needed.
 
 ---
