@@ -7,7 +7,7 @@
 
 A desktop app for tracking your LeetCode journey — problems, streaks, code, and everything in between. No cloud. No login. Just you and the grind.
 
-[![Download](https://img.shields.io/badge/Download-GrindOS%20v1.0.0-da7756?style=for-the-badge&logo=windows)](https://github.com/Kaustubhhbhoirr/GRINDOS/releases)
+[![Download](https://img.shields.io/badge/Download-GrindOS%20v1.1.0-da7756?style=for-the-badge&logo=windows)](https://github.com/Kaustubhhbhoirr/GRINDOS/releases)
 ![Electron](https://img.shields.io/badge/Electron-desktop-47848F?style=for-the-badge&logo=electron)
 ![React](https://img.shields.io/badge/React-Vite-61DAFB?style=for-the-badge&logo=react)
 ![Offline](https://img.shields.io/badge/100%25-Offline-4caf7d?style=for-the-badge)
