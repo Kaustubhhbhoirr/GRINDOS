@@ -17,7 +17,7 @@
     "appId": "com.grindos.app",
     "productName": "GrindOS",
     "directories": {
-      "output": "release-build"
+      "output": "release"
     },
     "files": [
       "dist/**/*",
@@ -37,6 +37,7 @@
       "icon": "public/icon.png"
     },
     "nsis": {
+      "artifactName": "GrindOS-Setup.exe",
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,

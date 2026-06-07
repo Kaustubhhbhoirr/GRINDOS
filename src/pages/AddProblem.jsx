@@ -58,6 +58,8 @@ export default function AddProblem() {
 
   // UI States
   const [customTags, setCustomTags] = useState([]);
+  const [showCustomTagInput, setShowCustomTagInput] = useState(false);
+  const [customTagValue, setCustomTagValue] = useState('');
   const [toast, setToast] = useState({ message: '', type: '' });
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -104,10 +106,9 @@ export default function AddProblem() {
     }
   };
 
-  const handleAddCustomTag = () => {
-    const tagName = prompt('Enter custom tag name:');
-    if (tagName && tagName.trim()) {
-      const cleanTag = tagName.trim();
+  const confirmCustomTag = () => {
+    if (customTagValue && customTagValue.trim()) {
+      const cleanTag = customTagValue.trim();
       if (!defaultTags.includes(cleanTag) && !customTags.includes(cleanTag)) {
         setCustomTags([...customTags, cleanTag]);
       }
@@ -115,6 +116,8 @@ export default function AddProblem() {
         setSelectedTags([...selectedTags, cleanTag]);
       }
     }
+    setShowCustomTagInput(false);
+    setCustomTagValue('');
   };
 
   const handleCopyCode = () => {
@@ -359,13 +362,36 @@ export default function AddProblem() {
                       </span>
                     );
                   })}
-                  <button
-                    type="button"
-                    onClick={handleAddCustomTag}
-                    className="px-3 py-1 rounded-full border border-dashed border-[#2a2a2a] text-[#da7756] hover:border-[#da7756] transition-all font-mono text-[12px] flex items-center gap-1 cursor-pointer"
-                  >
-                    <Plus size={12} /> Custom
-                  </button>
+                  {!showCustomTagInput ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowCustomTagInput(true)}
+                      className="px-3 py-1 rounded-full border border-dashed border-[#2a2a2a] text-[#da7756] hover:border-[#da7756] transition-all font-mono text-[12px] flex items-center gap-1 cursor-pointer"
+                    >
+                      <Plus size={12} /> Custom
+                    </button>
+                  ) : (
+                    <div className="flex items-center">
+                      <input
+                        autoFocus
+                        type="text"
+                        value={customTagValue}
+                        onChange={(e) => setCustomTagValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            confirmCustomTag();
+                          } else if (e.key === 'Escape') {
+                            setShowCustomTagInput(false);
+                            setCustomTagValue('');
+                          }
+                        }}
+                        onBlur={confirmCustomTag}
+                        placeholder="Tag name..."
+                        className="px-3 py-1 w-28 rounded-full border border-[#da7756] bg-[#131313] text-[#da7756] outline-none font-mono text-[12px]"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -424,18 +450,7 @@ export default function AddProblem() {
           {/* Right Column: Meta Form details & Actions */}
           <div className="lg:col-span-1 space-y-6">
             
-            {/* Card 3: Question Snapshot Upload (Simulation) */}
-            <div className="bg-[#1c1b1b] border border-[#2a2a2a] rounded-xl p-6 hover:border-[#da7756]/30 transition-colors select-none">
-              <label className="font-mono text-[12px] font-medium text-[#888888] uppercase tracking-wider mb-2 block">Question Snapshot</label>
-              <div 
-                onClick={() => showToast('Image snapshot selection simulated.', 'success')}
-                className="border-2 border-dashed border-[#2a2a2a] rounded-xl p-6 flex flex-col items-center justify-center text-[#888888] hover:border-[#da7756] hover:text-[#da7756] transition-colors cursor-pointer bg-[#131313] h-32"
-              >
-                <ImageIcon size={32} className="mb-2 text-[#888888]/80 group-hover:text-[#da7756]" />
-                <span className="text-[13px] font-sans">Drop image here</span>
-                <span className="font-mono text-[10px] text-[#444444] mt-1">or click to browse</span>
-              </div>
-            </div>
+
 
             {/* Card 4: Stats Spent & Star Ratings */}
             <div className="bg-[#1c1b1b] border border-[#2a2a2a] rounded-xl p-6 hover:border-[#da7756]/30 transition-colors space-y-4 select-none">

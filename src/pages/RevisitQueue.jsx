@@ -22,6 +22,10 @@ export default function RevisitQueue() {
   const [showBanner, setShowBanner] = useState(true);
   const [toast, setToast] = useState('');
   
+  const [resolveModalProblem, setResolveModalProblem] = useState(null);
+  const [resolveTime, setResolveTime] = useState('');
+  const [resolveConfidence, setResolveConfidence] = useState(3);
+  
   const listRef = useRef(null);
 
   useEffect(() => {
@@ -61,19 +65,29 @@ export default function RevisitQueue() {
     setTimeout(() => setToast(''), 4000);
   };
 
-  const handleResolveDirectly = async (prob) => {
-    if (!window.api) return;
+  const submitResolve = async () => {
+    if (!window.api || !resolveModalProblem) return;
     try {
       const existingProblems = await window.api.getProblems();
       const updatedList = existingProblems.map(p => {
-        if (p.id === prob.id) {
-          return { ...p, revisit: false };
+        if (p.id === resolveModalProblem.id) {
+          const newTime = resolveTime ? Number(resolveTime) : Number(p.timeSpent || 0);
+          return { 
+            ...p, 
+            revisit: false, 
+            timeSpent: newTime,
+            confidence: resolveConfidence,
+            solvedDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+          };
         }
         return p;
       });
       const response = await window.api.saveProblems(updatedList);
       if (response.success) {
-        showToast(`"${prob.title}" marked as resolved!`);
+        showToast(`"${resolveModalProblem.title}" marked as resolved!`);
+        setResolveModalProblem(null);
+        setResolveTime('');
+        setResolveConfidence(3);
         loadProblems();
       } else {
         showToast(`Failed to update problem: ${response.error}`);
@@ -82,6 +96,12 @@ export default function RevisitQueue() {
       console.error('Error resolving problem:', err);
       showToast(`Error: ${err.message}`);
     }
+  };
+
+  const handleResolveDirectly = (prob) => {
+    setResolveTime('');
+    setResolveConfidence(3);
+    setResolveModalProblem(prob);
   };
 
   const handleCompleteIt = (prob) => {
@@ -303,6 +323,7 @@ export default function RevisitQueue() {
                           scrollbar: { vertical: 'auto', horizontal: 'auto' },
                           fontSize: 12,
                           lineNumbers: 'on',
+                          wordWrap: 'on',
                           automaticLayout: true,
                           fontFamily: 'JetBrains Mono, Courier New, monospace',
                           domReadOnly: true
@@ -328,6 +349,65 @@ export default function RevisitQueue() {
           </div>
         </footer>
       </main>
+
+      {/* Resolve Modal */}
+      {resolveModalProblem && (
+        <div className="fixed inset-0 bg-[#0d0d0d]/80 backdrop-blur-sm z-50 flex items-center justify-center select-none animate-in fade-in duration-200">
+          <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-6 w-[360px] shadow-2xl relative animate-in scale-in duration-200">
+            <h3 className="text-[16px] font-bold text-center text-[#f0f0f0] mb-4 tracking-wide font-sans">
+              Re-solve Details
+            </h3>
+            
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="font-mono text-[11px] text-[#888888] uppercase block">New Time Spent (mins)</label>
+                <input 
+                  type="number"
+                  autoFocus
+                  placeholder="e.g. 15"
+                  value={resolveTime}
+                  onChange={(e) => setResolveTime(e.target.value)}
+                  className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-lg px-3 py-2 text-[#f0f0f0] font-mono outline-none focus:border-[#da7756]"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-mono text-[11px] text-[#888888] uppercase block flex justify-between items-center">
+                  <span>Confidence Level</span>
+                  <span className="text-[#da7756] font-bold">{resolveConfidence} / 5</span>
+                </label>
+                <input 
+                  type="range"
+                  min="1" max="5" step="1"
+                  value={resolveConfidence}
+                  onChange={(e) => setResolveConfidence(Number(e.target.value))}
+                  className="w-full accent-[#da7756]"
+                />
+                <div className="flex justify-between text-[10px] font-mono text-[#888888]">
+                  <span>Had to lookup</span>
+                  <span>Perfect</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={submitResolve}
+                className="flex-1 py-2 bg-[#da7756] hover:bg-[#ffb59d] text-[#0d0d0d] font-mono font-bold text-[12px] rounded-lg transition-colors cursor-pointer text-center"
+              >
+                Save & Resolve
+              </button>
+              <button
+                onClick={() => setResolveModalProblem(null)}
+                className="flex-1 py-2 bg-[#0d0d0d] border border-[#2a2a2a] text-[#888888] font-mono text-[12px] rounded-lg hover:text-[#f0f0f0] transition-colors cursor-pointer text-center"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

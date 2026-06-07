@@ -842,14 +842,14 @@ export default function Dashboard() {
               )}
 
               {/* Source/Leetcode external link button */}
-              {selectedProblemForModal.url && (
+              {selectedProblemForModal.link && (
                 <div className="space-y-2">
                   <span className="text-[11px] font-mono text-[#888888] uppercase block select-none">External Link</span>
                   <button 
                     onClick={() => {
-                      if (window.api?.openExternal) window.api.openExternal(selectedProblemForModal.url);
+                      if (window.api?.openExternal) window.api.openExternal(selectedProblemForModal.link);
                     }}
-                    className="flex items-center gap-2 bg-[#131313] hover:bg-[#ff8c5a]/10 border border-[#2a2a2a] hover:border-[#ff8c5a]/40 text-[#ff8c5a] font-mono text-[13px] px-4 py-2.5 rounded-xl transition-all cursor-pointer w-full justify-center md:w-fit font-bold hover:shadow-[0_0_12px_rgba(255,140,90,0.1)]"
+                    className="flex items-center gap-2 bg-[#131313] hover:bg-[#da7756]/10 border border-[#2a2a2a] hover:border-[#da7756]/40 text-[#da7756] font-mono text-[13px] px-4 py-2.5 rounded-xl transition-all cursor-pointer w-full justify-center md:w-fit font-bold hover:shadow-[0_0_12px_rgba(218,119,86,0.1)]"
                   >
                     Solve on Leetcode <ExternalLink size={14} />
                   </button>

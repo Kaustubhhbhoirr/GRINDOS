@@ -165,7 +165,9 @@ export default function Search() {
               <SearchIcon size={18} />
             </div>
             <input 
+              id="search-input"
               type="text"
+              autoFocus
               placeholder="search problems by name, notes logic, or category..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -398,9 +400,9 @@ export default function Search() {
                 <h2 className="text-[18px] font-bold font-sans text-[#f0f0f0] tracking-tight leading-snug">
                   {selectedProblem.title}
                 </h2>
-                {selectedProblem.url && (
+                {selectedProblem.link && (
                   <button
-                    onClick={(e) => handleOpenLink(selectedProblem.url, e)}
+                    onClick={(e) => handleOpenLink(selectedProblem.link, e)}
                     className="flex items-center gap-1 text-[#da7756] hover:text-[#ffb59d] font-mono text-[11px] shrink-0 cursor-pointer select-none"
                   >
                     LeetCode
@@ -459,6 +461,7 @@ export default function Search() {
                       scrollbar: { vertical: 'hidden', horizontal: 'hidden' },
                       fontSize: 12,
                       lineNumbers: 'on',
+                      wordWrap: 'on',
                       automaticLayout: true,
                       fontFamily: 'JetBrains Mono, Courier New, monospace',
                       domReadOnly: true

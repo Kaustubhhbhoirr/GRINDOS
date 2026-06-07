@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { LayoutGrid, PlusSquare, RefreshCw, User, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -12,6 +12,8 @@ const navItems = [
 
 export default function Layout() {
   const [userName, setUserName] = useState('Grinder');
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const loadProfileName = () => {
     const stored = localStorage.getItem('grindos_profile_info');
@@ -51,6 +53,30 @@ export default function Layout() {
       window.removeEventListener('storage', loadProfileName);
     };
   }, [userName]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (location.pathname !== '/search') {
+          navigate('/search');
+          setTimeout(() => {
+            const input = document.getElementById('search-input');
+            if (input) input.focus();
+          }, 150);
+        } else {
+          const input = document.getElementById('search-input');
+          if (input) {
+            input.focus();
+            input.select();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navigate, location]);
 
   const getInitials = (name) => {
     if (!name) return 'GR';
